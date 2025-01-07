@@ -35,84 +35,45 @@ class DovetailPart(Enum):
     SOCKET = 2
 
 
-# def split_part(
-#     part: Part,
-#     start: Point,
-#     end: Point,
-#     linear_offset=0,
-#     tolerance=0.025,
-#     angle_offset=15,
-#     scarf_distance=0,
-#     length_ratio=3,
-#     depth_ratio=6,
-# ) -> Compound:
-#     base_angle = start.angle_to(end)
-#     max_dimension = (
-#         max(
-#             part.bounding_box().size.X,
-#             part.bounding_box().size.Y,
-#             part.bounding_box().size.Z,
-#         )
-#         * 3
-#     )
-
-#     with BuildLine() as bottom_tail_line:
-#         Polyline(
-#             tuple(start),
-#             tuple(start.related_point(base_angle + 225, max_dimension)),
-#             tuple(end.related_point(base_angle + 135, max_dimension)),
-#             tuple(end),
-#         )
-#         add(
-#             (
-#                 start=start,
-#                 end=end,
-#                 section=DovetailPart.TAIL,
-#                 linear_offset=linear_offset,
-#                 tolerance=tolerance,
-#                 angle_offset=angle_offset,
-#                 scarf_distance=0,
-#                 length_ratio=length_ratio,
-#                 depth_ratio=depth_ratio,
-#             )
-#         )
-#     with BuildLine() as top_tail_line:
-#         add(
-#             dovetail_split_line(
-#                 start=start,
-#                 end=end,
-#                 section=DovetailPart.TAIL,
-#                 linear_offset=linear_offset,
-#                 tolerance=tolerance,
-#                 angle_offset=angle_offset,
-#                 scarf_distance=scarf_distance,
-#                 length_ratio=length_ratio,
-#                 depth_ratio=depth_ratio,
-#             )
-#         )
-
-#     part1 = Part()
-#     part2 = Part()
-#     return Compound(part1, part2)
-
-
-def tail_part_outline(
+def subpart_outline(
     part: Part,
     start: Point,
     end: Point,
+    section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.025,
-    angle_offset=15,
+    tolerance=0.05,
+    tail_angle_offset=15,
     scarf_distance=0,
     length_ratio=3,
     depth_ratio=6,
+    tilt_offset=0,
 ) -> Line:
+    """
+    given a part and a start and end point on the XY plane, returns an outline to build an intersection Part to generate the subpart
+    args:
+        - part: the part to split
+        - start: the start point along the XY Plane for the dovetail line
+        - end: the end point along the XY Plane for the dovetail line
+        - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
+        - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
+        - tolerance: the tolerance for the split
+        - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
+        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
+        - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
+        - tilt_offset: setting this to a non-zero value will shift the dovetail to allow for tilt adjustemnt between the top & bottom outlines
+    """
+    direction_multiplier = 1 if section == DovetailPart.TAIL else -1
     base_angle = start.angle_to(end)
-    dovetail_tolerance = -(abs(tolerance / 2))
-    adjusted_start_point = start.related_point(
+    dovetail_tolerance = -(abs(tolerance / 2)) * direction_multiplier
+    adjusted_start_point = start.related_point(base_angle - 90, tilt_offset)
+    adjusted_end_point = end.related_point(base_angle - 90, tilt_offset)
+    toleranced_start_point = adjusted_start_point.related_point(
         base_angle - 90, dovetail_tolerance
     )
-    adjusted_end_point = end.related_point(base_angle - 90, dovetail_tolerance)
+    toleranced_end_point = adjusted_end_point.related_point(
+        base_angle - 90, dovetail_tolerance
+    )
 
     max_dimension = (
         max(
@@ -125,35 +86,35 @@ def tail_part_outline(
 
     with BuildLine() as bottom_tail_line:
         Polyline(
-            tuple(adjusted_start_point),
+            tuple(toleranced_start_point),
             tuple(
-                adjusted_start_point.related_point(
+                toleranced_start_point.related_point(
                     base_angle + 180, max_dimension
                 )
             ),
             tuple(
-                adjusted_start_point.related_point(
-                    base_angle - 225, max_dimension
+                toleranced_start_point.related_point(
+                    base_angle - 225 * direction_multiplier, max_dimension
                 )
             ),
             tuple(
-                adjusted_start_point.related_point(
-                    base_angle + 45, max_dimension
+                toleranced_start_point.related_point(
+                    base_angle + 45 * direction_multiplier, max_dimension
                 )
             ),
             tuple(
-                adjusted_start_point.related_point(base_angle, max_dimension)
+                toleranced_start_point.related_point(base_angle, max_dimension)
             ),
-            tuple(adjusted_end_point),
+            tuple(toleranced_end_point),
         )
         add(
             dovetail_split_line(
-                start=start,
-                end=end,
-                section=DovetailPart.TAIL,
+                start=adjusted_start_point,
+                end=adjusted_end_point,
+                section=section,
                 linear_offset=linear_offset,
                 tolerance=tolerance,
-                angle_offset=angle_offset,
+                tail_angle_offset=tail_angle_offset,
                 scarf_distance=scarf_distance,
                 length_ratio=length_ratio,
                 depth_ratio=depth_ratio,
@@ -162,162 +123,69 @@ def tail_part_outline(
     return bottom_tail_line.line
 
 
-def socket_part_outline(
+def subpart(
     part: Part,
     start: Point,
     end: Point,
+    section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.025,
-    angle_offset=15,
+    tolerance=0.05,
+    tail_angle_offset=15,
     scarf_distance=0,
-    length_ratio=3,
-    depth_ratio=6,
-) -> Line:
-    base_angle = start.angle_to(end)
-    dovetail_tolerance = abs(tolerance / 2)
-    adjusted_start_point = start.related_point(
-        base_angle - 90, dovetail_tolerance
-    )
-    adjusted_end_point = end.related_point(base_angle - 90, dovetail_tolerance)
-
-    max_dimension = (
-        max(
-            part.bounding_box().size.X,
-            part.bounding_box().size.Y,
-            part.bounding_box().size.Z,
-        )
-        * 3
-    )
-
-    with BuildLine() as socket_line:
-        Polyline(
-            tuple(adjusted_start_point),
-            tuple(
-                adjusted_start_point.related_point(
-                    base_angle + 180, max_dimension
-                )
-            ),
-            tuple(
-                adjusted_start_point.related_point(
-                    base_angle + 225, max_dimension
-                )
-            ),
-            tuple(
-                adjusted_start_point.related_point(
-                    base_angle - 45, max_dimension
-                )
-            ),
-            tuple(
-                adjusted_start_point.related_point(base_angle, max_dimension)
-            ),
-            tuple(adjusted_end_point),
-        )
-        add(
-            dovetail_split_line(
-                start=start,
-                end=end,
-                section=DovetailPart.SOCKET,
-                linear_offset=linear_offset,
-                tolerance=tolerance,
-                angle_offset=angle_offset,
-                scarf_distance=scarf_distance,
-                length_ratio=length_ratio,
-                depth_ratio=depth_ratio,
-            )
-        )
-    return socket_line.line
-
-
-def tail_subpart(
-    part: Part,
-    start: Point,
-    end: Point,
-    linear_offset=0,
-    tolerance=0.025,
-    angle_offset=15,
-    scarf_distance=0,
-    length_ratio=3,
-    depth_ratio=6,
+    length_ratio=1 / 3,
+    depth_ratio=1 / 6,
+    tilt=0,
 ) -> Part:
+    """
+    given a part and a start and end point on the XY plane, returns a Part for the appropriate split section
+    args:
+        - part: the part to split
+        - start: the start point along the XY Plane for the dovetail line
+        - end: the end point along the XY Plane for the dovetail line
+        - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
+        - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
+        - tolerance: the tolerance for the split
+        - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
+        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
+        - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
+        - tilt: setting this to a non-zero value will tilt the dovetail along the Z axis which may improve part stability
+    """
+    tilt_offset = (part.bounding_box().size.Z * tan(radians(tilt))) / 2
     with BuildPart() as intersect:
         with BuildSketch(Plane.XY.offset(part.bounding_box().min.Z)):
             with BuildLine():
                 add(
-                    tail_part_outline(
+                    subpart_outline(
                         part=part,
                         start=start,
                         end=end,
+                        section=section,
                         linear_offset=linear_offset,
                         tolerance=tolerance,
-                        angle_offset=angle_offset,
+                        tail_angle_offset=tail_angle_offset,
                         scarf_distance=scarf_distance,
                         length_ratio=length_ratio,
                         depth_ratio=depth_ratio,
+                        tilt_offset=-tilt_offset,
                     )
                 )
             make_face()
         with BuildSketch(Plane.XY.offset(part.bounding_box().max.Z)):
             with BuildLine():
                 add(
-                    tail_part_outline(
+                    subpart_outline(
                         part=part,
                         start=start,
                         end=end,
+                        section=section,
                         linear_offset=linear_offset,
                         tolerance=tolerance,
-                        angle_offset=angle_offset,
+                        tail_angle_offset=tail_angle_offset,
                         scarf_distance=0,
                         length_ratio=length_ratio,
                         depth_ratio=depth_ratio,
-                    )
-                )
-            make_face()
-        loft()
-        add(part, mode=Mode.INTERSECT)
-    return intersect.part
-
-
-def socket_subpart(
-    part: Part,
-    start: Point,
-    end: Point,
-    linear_offset=0,
-    tolerance=0.025,
-    angle_offset=15,
-    scarf_distance=0,
-    length_ratio=3,
-    depth_ratio=6,
-) -> Part:
-    with BuildPart() as intersect:
-        with BuildSketch(Plane.XY.offset(part.bounding_box().min.Z)):
-            with BuildLine():
-                add(
-                    socket_part_outline(
-                        part=part,
-                        start=start,
-                        end=end,
-                        linear_offset=linear_offset,
-                        tolerance=tolerance,
-                        angle_offset=angle_offset,
-                        scarf_distance=scarf_distance,
-                        length_ratio=length_ratio,
-                        depth_ratio=depth_ratio,
-                    )
-                )
-            make_face()
-        with BuildSketch(Plane.XY.offset(part.bounding_box().max.Z)):
-            with BuildLine():
-                add(
-                    socket_part_outline(
-                        part=part,
-                        start=start,
-                        end=end,
-                        linear_offset=linear_offset,
-                        tolerance=tolerance,
-                        angle_offset=angle_offset,
-                        scarf_distance=0,
-                        length_ratio=length_ratio,
-                        depth_ratio=depth_ratio,
+                        tilt_offset=tilt_offset,
                     )
                 )
             make_face()
@@ -331,22 +199,24 @@ def dovetail_split_line(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.025,
-    angle_offset=15,
+    tolerance=0.05,
+    tail_angle_offset=15,
     scarf_distance=0,
-    length_ratio=3,
-    depth_ratio=6,
+    length_ratio=1 / 3,
+    depth_ratio=1 / 6,
 ) -> Line:
     """
-    given a start and a length, returns a dovetail split outline as a Line object
+    given a start and end point, returns a dovetail split outline as a Line object
     args:
-        - start: the part to split
-        - length: the length of the cut (the dovetail will take approximately 1/3 of the length)
+        - start: the start point for the dovetail line
+        - end: the end point for the dovetail line
         - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
-        - linear_offset: offsets the placement of the dovetail by the ammount specified
+        - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
         - tolerance: the tolerance for the split
-        - angle_offset: the adjustment pitch of angle of the dovetail
-        - scarf_distance: an extra shrinking factor for the dovetail size
+        - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
+        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
+        - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
     """
     dovetail_tolerance = (
         -(abs(tolerance / 2))
@@ -356,8 +226,8 @@ def dovetail_split_line(
 
     base_angle = start.angle_to(end)
     length = start.distance_to(end)
-    tongue_length = length / length_ratio
-    tongue_depth = length / depth_ratio
+    tongue_length = length * length_ratio
+    tongue_depth = length * depth_ratio
     adjusted_start_point = start.related_point(
         base_angle - 90, dovetail_tolerance
     )
@@ -379,11 +249,11 @@ def dovetail_split_line(
         + linear_offset,
     )
     tail_end_start = tail_base_start.related_point(
-        base_angle - 90 - angle_offset,
+        base_angle - 90 - tail_angle_offset,
         tongue_depth - scarf_distance,
     )
     tail_end = tail_base_resume.related_point(
-        base_angle - 90 + angle_offset,
+        base_angle - 90 + tail_angle_offset,
         tongue_depth - scarf_distance,
     )
     adjusted_end_point = adjusted_start_point.related_point(base_angle, length)
@@ -435,35 +305,24 @@ def dovetail_split_line(
 
 
 if __name__ == "__main__":
-    # show(
-    #     (
-    #         Point(0, 0),
-    #         Point(5, 5),
-    #         section=DovetailPart.TAIL,
-    #         linear_offset=0,
-    #         scarf_distance=0,
-    #     ),
-    #     dovetail_split_line(
-    #         Point(0, 0),
-    #         Point(5, 5),
-    #         section=DovetailPart.SOCKET,
-    #         linear_offset=0,
-    #     ),
-    #     reset_camera=Camera.KEEP,
-    # )
     with BuildPart() as test:
         Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
     show(
-        # test.part,
-        # socket_part_outline(
-        #     test.part, Point(-5, 0), Point(5, 0), scarf_distance=0.5
-        # ),
-        # tail_part_outline(
-        #     test.part, Point(-5, 0), Point(5, 0), scarf_distance=0.5
-        # ),
-        tail_subpart(test.part, Point(-5, 0), Point(5, 0), scarf_distance=0.5),
-        socket_subpart(
-            test.part, Point(-5, 0), Point(5, 0), scarf_distance=0.5
+        subpart(
+            test.part,
+            Point(-5, 0),
+            Point(5, 0),
+            scarf_distance=0.5,
+            section=DovetailPart.TAIL,
+            tilt=20,
+        ),
+        subpart(
+            test.part,
+            Point(-5, 0),
+            Point(5, 0),
+            scarf_distance=0.5,
+            section=DovetailPart.SOCKET,
+            tilt=20,
         ),
         reset_camera=Camera.KEEP,
     )
