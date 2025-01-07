@@ -20,7 +20,17 @@ class TestClickfit:
 
     def test_direct_run(self):
 
-        loader = SourceFileLoader("__main__", "src/fb_library/click_fit.py")
-        loader.exec_module(
-            module_from_spec(spec_from_loader(loader.name, loader))
-        )
+        with (
+            patch("build123d.export_stl"),
+            patch("pathlib.Path.mkdir"),
+            patch("pathlib.Path.exists"),
+            patch("pathlib.Path.is_dir"),
+            patch("ocp_vscode.show"),
+            patch("ocp_vscode.save_screenshot"),
+        ):
+            loader = SourceFileLoader(
+                "__main__", "src/fb_library/click_fit.py"
+            )
+            loader.exec_module(
+                module_from_spec(spec_from_loader(loader.name, loader))
+            )

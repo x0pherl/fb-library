@@ -22,7 +22,7 @@ from build123d import (
     loft,
     make_face,
 )
-from point import (
+from fb_library import (
     Point,
     midpoint,
     shifted_midpoint,
@@ -35,7 +35,7 @@ class DovetailPart(Enum):
     SOCKET = 2
 
 
-def subpart_outline(
+def dovetail_subpart_outline(
     part: Part,
     start: Point,
     end: Point,
@@ -123,7 +123,7 @@ def subpart_outline(
     return bottom_tail_line.line
 
 
-def subpart(
+def dovetail_subpart(
     part: Part,
     start: Point,
     end: Point,
@@ -156,7 +156,7 @@ def subpart(
         with BuildSketch(Plane.XY.offset(part.bounding_box().min.Z)):
             with BuildLine():
                 add(
-                    subpart_outline(
+                    dovetail_subpart_outline(
                         part=part,
                         start=start,
                         end=end,
@@ -174,7 +174,7 @@ def subpart(
         with BuildSketch(Plane.XY.offset(part.bounding_box().max.Z)):
             with BuildLine():
                 add(
-                    subpart_outline(
+                    dovetail_subpart_outline(
                         part=part,
                         start=start,
                         end=end,
@@ -308,7 +308,7 @@ if __name__ == "__main__":
     with BuildPart() as test:
         Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
     show(
-        subpart(
+        dovetail_subpart(
             test.part,
             Point(-5, 0),
             Point(5, 0),
@@ -316,7 +316,7 @@ if __name__ == "__main__":
             section=DovetailPart.TAIL,
             tilt=20,
         ),
-        subpart(
+        dovetail_subpart(
             test.part,
             Point(-5, 0),
             Point(5, 0),
