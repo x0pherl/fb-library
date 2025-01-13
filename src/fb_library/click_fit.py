@@ -13,7 +13,7 @@ from build123d import (
 from ocp_vscode import show, Camera
 
 
-def divot(radius, positive=True) -> Part:
+def divot(radius: float = 0.5, positive: bool = True) -> Part:
     tolerance = 0 if not positive else radius * 0.05
     ratio = 0.5 if positive else 0.55
     with BuildPart() as divot_part:

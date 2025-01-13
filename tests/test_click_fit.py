@@ -8,7 +8,7 @@ from pathlib import Path
 
 from build123d import BuildPart, Box, Part, Sphere, Align, Mode, Location
 
-from click_fit import divot
+from fb_library.click_fit import divot
 
 
 class TestClickfit:

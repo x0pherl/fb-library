@@ -6,9 +6,15 @@ import pytest
 from unittest.mock import patch
 from pathlib import Path
 
-from build123d import BuildPart, Box, Part, Sphere, Align, Mode, Location
+from build123d import BuildPart, Box, Part, Sphere, Align, Mode, Location, add
 
-from dovetail import DovetailPart, dovetail_split_line
+from fb_library.point import Point
+
+from fb_library.dovetail import (
+    DovetailPart,
+    dovetail_split_line,
+    dovetail_subpart,
+)
 
 
 class TestDovetail:
@@ -25,4 +31,98 @@ class TestDovetail:
             loader = SourceFileLoader("__main__", "src/fb_library/dovetail.py")
             loader.exec_module(
                 module_from_spec(spec_from_loader(loader.name, loader))
+            )
+
+    def test_vertical_offset_too_high(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with pytest.raises(ValueError):
+            x = (
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    # scarf_distance=0.5,
+                    section=DovetailPart.TAIL,
+                    # tilt=20,
+                    vertical_offset=100,
+                ),
+            )
+
+    def test_vertical_offset_too_low(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with pytest.raises(ValueError):
+            x = (
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    # scarf_distance=0.5,
+                    section=DovetailPart.TAIL,
+                    # tilt=20,
+                    vertical_offset=-100,
+                ),
+            )
+
+    def test_valid_tail(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with BuildPart() as tail:
+            add(
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    # scarf_distance=0.5,
+                    section=DovetailPart.TAIL,
+                    # tilt=20,
+                    vertical_offset=0.5,
+                ),
+            )
+        assert tail.part.is_valid()
+
+    def test_valid_socket(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with BuildPart() as socket:
+            add(
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    scarf_distance=-0.5,
+                    section=DovetailPart.SOCKET,
+                    tilt=20,
+                    vertical_offset=-0.5,
+                ),
+            )
+        assert socket.part.is_valid()
+
+    def test_valid_vert_tail(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with pytest.raises(ValueError):
+            x = (
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    scarf_distance=0.5,
+                    section=DovetailPart.TAIL,
+                    # tilt=20,
+                    vertical_offset=-0.5,
+                ),
+            )
+        with pytest.raises(ValueError):
+            x = (
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    scarf_distance=-0.5,
+                    section=DovetailPart.TAIL,
+                    # tilt=20,
+                    vertical_offset=0.5,
+                ),
             )

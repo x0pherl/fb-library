@@ -5,7 +5,7 @@ from unittest.mock import patch
 from pathlib import Path
 
 
-from point import Point, midpoint, shifted_midpoint
+from fb_library.point import Point, midpoint, shifted_midpoint
 
 
 class TestPoint:
