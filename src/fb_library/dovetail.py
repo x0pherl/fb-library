@@ -202,7 +202,11 @@ def subpart_divots(
             mode=topmode,
         ):
             add(
-                divot(click_fit_radius, positive=topmode == Mode.ADD)
+                divot(
+                    click_fit_radius,
+                    positive=topmode == Mode.ADD,
+                    extend_base=True,
+                )
                 .rotate(
                     Axis.X,
                     (90 * (-1 if vertical_offset < 0 else 1))
@@ -236,7 +240,11 @@ def subpart_divots(
             mode=bottommode,
         ):
             add(
-                divot(click_fit_radius, positive=bottommode == Mode.ADD)
+                divot(
+                    click_fit_radius,
+                    positive=bottommode == Mode.ADD,
+                    extend_base=True,
+                )
                 .rotate(
                     Axis.X, (90 * (1 if vertical_offset < 0 else -1)) + tilt
                 )
@@ -247,7 +255,7 @@ def subpart_divots(
             mode=bottommode,
         ):
             add(
-                divot(click_fit_radius, positive=True)
+                divot(click_fit_radius, positive=True, extend_base=True)
                 .rotate(
                     Axis.X,
                     (90 * (1 if vertical_offset < 0 else -1)) + tilt,
