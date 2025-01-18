@@ -1,5 +1,5 @@
 from enum import Enum
-from math import radians, tan
+from math import atan, atan2, degrees, radians, tan
 from typing import Tuple
 from build123d import (
     Align,
@@ -21,13 +21,18 @@ from build123d import (
     loft,
     make_face,
 )
-from fb_library.point import (
+
+from build123d.objects_part import Cylinder, Sphere
+
+from point import (
+    # from fb_library.point import (
     Point,
     midpoint,
     shifted_midpoint,
 )
 
-from fb_library.click_fit import divot
+# from fb_library.click_fit import divot
+from click_fit import divot
 
 from ocp_vscode import show, Camera
 
@@ -142,19 +147,116 @@ def subpart_divots(
     vertical_offset=0,
     click_fit_radius=0,
 ):
+
     cut_angle = start.angle_to(end)
-    tailtop = vertical_offset if vertical_offset < 0 else 0
-    tailtop_offset = tailtop * tan(radians(tilt))
+
+    # how much of an offset is there along the top and bottom of the subparts
+    tilt_offset = (subpart.bounding_box().size.Z) * tan(radians(tilt)) / 2
+
+    tailtop_z = subpart.bounding_box().max.Z + (
+        vertical_offset if vertical_offset < 0 else 0
+    )
+    # if there's a scarf, the tail is at a different angle than the rest of the subpart
+    adjusted_top_divot_angle = (
+        tilt
+        if scarf_distance == 0
+        else tilt
+        - (-degrees(atan((scarf_distance + abs(tolerance * 4)) / tailtop_z)))
+    )
+
+    # the required adjustement when the top of the dovetail is not the top of the part
+    tailtop_offset = tailtop_z * tan(radians(abs(adjusted_top_divot_angle)))
+
+    topmode = (
+        Mode.SUBTRACT
+        if ((section == DovetailPart.TAIL) == (vertical_offset < 0))
+        else Mode.ADD
+    )
+    bottommode = (
+        Mode.ADD
+        if ((section == DovetailPart.SOCKET) == (vertical_offset >= 0))
+        else Mode.SUBTRACT
+    )
+
+    top_divot_center = midpoint(start, end).related_point(
+        cut_angle - 90,
+        -tilt_offset
+        + start.distance_to(end) * depth_ratio
+        + abs(tolerance) * (0.5 if vertical_offset < 0 else -0.5)
+        - scarf_distance
+        + tailtop_offset
+        - ((click_fit_radius * 2) * tan(radians(adjusted_top_divot_angle))),
+    )
+    with BuildPart() as divotedpart:
+        add(subpart, mode=Mode.ADD)
+        with BuildPart(
+            Location(
+                (
+                    top_divot_center.x,
+                    top_divot_center.y,
+                    tailtop_z - click_fit_radius * 2,
+                )
+            ),
+            mode=topmode,
+        ):
+            add(
+                divot(click_fit_radius, positive=topmode == Mode.ADD)
+                .rotate(
+                    Axis.X,
+                    (90 * (-1 if vertical_offset < 0 else 1))
+                    + adjusted_top_divot_angle,
+                )
+                .rotate(Axis.Y, cut_angle),
+            )
+
+    return divotedpart.part
+
+
+def oldsubpart_divots(
+    subpart: Part,
+    start: Point,
+    end: Point,
+    section: DovetailPart = DovetailPart.TAIL,
+    linear_offset=0,
+    tolerance=0.05,
+    tilt=0,
+    scarf_distance=0,
+    depth_ratio=1 / 6,
+    vertical_offset=0,
+    click_fit_radius=0,
+):
+
+    cut_angle = start.angle_to(end)
+
+    # if there's a scarf, the tail is at a different angle than the rest of the subpart
+    adjusted_top_divot_angle = (
+        tilt
+        if scarf_distance == 0
+        else tilt
+        - atan2(
+            subpart.bounding_box().size.Z - abs(vertical_offset),
+            scarf_distance,
+        )
+    )
+
+    # how much of an offset is there along the top and bottom of the subparts
     tilt_offset = (
         (subpart.bounding_box().size.Z - abs(click_fit_radius * 4))
-        * tan(radians(tilt))
+        * tan(radians(adjusted_top_divot_angle))
         / 2
     )
-    scarf_offset = (
-        scarf_distance
-        * tan(radians(tilt))
-        * (-1 if vertical_offset < 0 else 1)
+
+    adjusted_scarf_distance = 0 if vertical_offset > 0 else 0
+
+    tailtop_z = (
+        subpart.bounding_box().max.Z
+        - click_fit_radius * 2
+        + (vertical_offset if vertical_offset < 0 else 0)
     )
+
+    # the required adjustement when the top of the dovetail is not the top of the part
+    tailtop_offset = tailtop_z * tan(radians(adjusted_top_divot_angle))
+
     topmode = (
         Mode.SUBTRACT
         if ((section == DovetailPart.TAIL) == (vertical_offset < 0))
@@ -167,8 +269,50 @@ def subpart_divots(
         else Mode.SUBTRACT
     )
 
+    tail_center = midpoint(start, end).related_point(
+        cut_angle - 90,
+        start.distance_to(end) * depth_ratio
+        + abs(tolerance) * (2 if vertical_offset < 0 else -2)
+        + scarf_distance,
+    )
+
     with BuildPart() as divotedpart:
         add(subpart, mode=Mode.ADD)
+        print(
+            f"""cut angle = {cut_angle}
+        tilt offset = {tilt_offset}
+        tailtop_offset={tailtop_offset}
+        tolerance={tolerance}
+        vertical_offset={vertical_offset}
+        depth = {(start.distance_to(end) * depth_ratio)}
+        scarf_distance={scarf_distance}
+        magic number={-tailtop_offset - 3.9+ (start.distance_to(end) * depth_ratio)}
+        possible_solution = {start.distance_to(end) * depth_ratio - scarf_distance + abs(tolerance) * (2 if vertical_offset < 0 else -2)}
+        """
+        )
+        with BuildPart(
+            Location(
+                (
+                    tail_center.x,
+                    tail_center.y,
+                    tailtop_z,
+                )
+            ),
+            mode=topmode,
+        ):
+            add(
+                divot(click_fit_radius, positive=topmode == Mode.ADD)
+                .rotate(
+                    Axis.X,
+                    (90 * (-1 if vertical_offset < 0 else 1))
+                    + adjusted_top_divot_angle,
+                )
+                .rotate(Axis.Y, cut_angle),
+            )
+
+        #####################################
+        # Bottom divots
+        #####################################
         start_side = start.related_point(
             cut_angle, click_fit_radius * 2
         ).related_point(
@@ -181,34 +325,6 @@ def subpart_divots(
             cut_angle - 90,
             -tilt_offset - abs(tolerance) / (2 if vertical_offset < 0 else -2),
         )
-        tail_center = midpoint(start, end).related_point(
-            cut_angle - 90,
-            tilt_offset
-            + tailtop_offset
-            + abs(tolerance) * (2 if vertical_offset < 0 else -2)
-            - scarf_offset
-            + (start.distance_to(end) * depth_ratio),
-        )
-        with BuildPart(
-            Location(
-                (
-                    tail_center.x,
-                    tail_center.y,
-                    subpart.bounding_box().max.Z
-                    - click_fit_radius * 2
-                    + tailtop,
-                )
-            ),
-            mode=topmode,
-        ):
-            add(
-                divot(click_fit_radius, positive=topmode == Mode.ADD)
-                .rotate(
-                    Axis.X,
-                    (90 * (-1 if vertical_offset < 0 else 1)) + tilt,
-                )
-                .rotate(Axis.Y, cut_angle),
-            )
         with BuildPart(
             Location(
                 (
@@ -233,7 +349,8 @@ def subpart_divots(
             add(
                 divot(click_fit_radius, positive=True)
                 .rotate(
-                    Axis.X, (90 * (1 if vertical_offset < 0 else -1)) + tilt
+                    Axis.X,
+                    (90 * (1 if vertical_offset < 0 else -1)) + tilt,
                 )
                 .rotate(Axis.Y, cut_angle),
             )
@@ -454,7 +571,7 @@ def dovetail_subpart(
                 scarf_distance,
                 depth_ratio,
                 vertical_offset,
-                0.5,
+                click_fit_radius,
             )
 
     return intersect.part
@@ -473,7 +590,8 @@ def dovetail_split_line(
 ) -> Line:
     """
     given a start and end point, returns a dovetail split outline as a Line object
-    args:
+    -------
+    arguments:
         - start: the start point for the dovetail line
         - end: the end point for the dovetail line
         - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
@@ -514,14 +632,22 @@ def dovetail_split_line(
         - scarf_distance
         + linear_offset,
     )
+    # tail_end_start = tail_base_start.related_point(
+    #     base_angle - 90 - tail_angle_offset,
+    #     tongue_depth - scarf_distance,
+    # )
+    tail_angle_extension = (tongue_depth - scarf_distance) * tan(
+        radians(tail_angle_offset)
+    )
     tail_end_start = tail_base_start.related_point(
-        base_angle - 90 - tail_angle_offset,
+        base_angle - 90,
         tongue_depth - scarf_distance,
-    )
+    ).related_point(base_angle, -tail_angle_extension)
+
     tail_end = tail_base_resume.related_point(
-        base_angle - 90 + tail_angle_offset,
+        base_angle - 90,
         tongue_depth - scarf_distance,
-    )
+    ).related_point(base_angle, tail_angle_extension)
     adjusted_end_point = adjusted_start_point.related_point(base_angle, length)
 
     with BuildLine() as dovetail_outline:
@@ -572,33 +698,53 @@ def dovetail_split_line(
 
 if __name__ == "__main__":
     with BuildPart(mode=Mode.PRIVATE) as test:
-        Box(10, 50, 10, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        Box(50, 40, 50, align=(Align.CENTER, Align.CENTER, Align.MIN))
         show(
             dovetail_subpart(
                 test.part,
-                Point(-5, 0),
-                Point(5, 0),
-                scarf_distance=0.25,
+                Point(-25, 0),
+                Point(25, 0),
+                scarf_distance=-2,
+                # scarf_distance=0,
                 section=DovetailPart.TAIL,
                 tilt=20,
-                vertical_offset=2,
+                vertical_offset=-16.5,
                 click_fit_radius=1.25,
             ),
             dovetail_subpart(
                 test.part,
-                Point(-5, 0),
-                Point(5, 0),
-                scarf_distance=0.25,
+                Point(-25, 0),
+                Point(25, 0),
+                scarf_distance=-2,
+                # scarf_distance=0,
                 section=DovetailPart.SOCKET,
                 tilt=20,
-                vertical_offset=2,
+                vertical_offset=-16.5,
                 click_fit_radius=1.25,
-            ).move(Location((0, -10, 0))),
-            # dovetail_subpart_outline(
-            #     test.part,
+            ).move(Location((0, -40, 0))),
+            # dovetail_split_line(
+            #     # test.part,
             #     Point(-5, 0),
             #     Point(5, 0),
             #     scarf_distance=0.5,
+            #     section=DovetailPart.SOCKET,
+            #     # tilt=20,
+            # ),
+            # dovetail_split_line(
+            #     # test.part,
+            #     Point(-5, 0),
+            #     Point(5, 0),
+            #     scarf_distance=0.5,
+            #     tail_angle_offset=0,
+            #     section=DovetailPart.SOCKET,
+            #     # tilt=20,
+            # ),
+            # dovetail_split_line(
+            #     # test.part,
+            #     Point(-5, 0),
+            #     Point(5, 0),
+            #     scarf_distance=0.5,
+            #     tail_angle_offset=35,
             #     section=DovetailPart.SOCKET,
             #     # tilt=20,
             # ),

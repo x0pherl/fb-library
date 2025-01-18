@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from math import atan2, cos, degrees, radians, sin
+from math import atan2, cos, degrees, radians, sin, tan
 from typing import Union, Tuple
 
 
