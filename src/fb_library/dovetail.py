@@ -161,11 +161,15 @@ def subpart_divots(
         tilt
         if scarf_distance == 0
         else tilt
-        - (-degrees(atan((scarf_distance + abs(tolerance * 4)) / tailtop_z)))
+        + (degrees(atan((scarf_distance + abs(tolerance * 4)) / tailtop_z)))
     )
 
     # the required adjustement when the top of the dovetail is not the top of the part
-    tailtop_offset = tailtop_z * tan(radians(abs(adjusted_top_divot_angle)))
+    tailtop_offset = (
+        tailtop_z
+        * tan(radians(abs(adjusted_top_divot_angle)))
+        * (-1 if tilt < 0 else 1)
+    )
 
     topmode = (
         Mode.SUBTRACT
@@ -602,22 +606,22 @@ if __name__ == "__main__":
                 test.part,
                 Point(-25, 0),
                 Point(25, 0),
-                scarf_distance=-2,
+                # scarf_distance=2,
                 # scarf_distance=0,
                 section=DovetailPart.TAIL,
                 tilt=20,
-                vertical_offset=-16.5,
+                vertical_offset=16.5,
                 click_fit_radius=1.25,
             ),
             dovetail_subpart(
                 test.part,
                 Point(-25, 0),
                 Point(25, 0),
-                scarf_distance=-2,
+                scarf_distance=2,
                 # scarf_distance=0,
                 section=DovetailPart.SOCKET,
                 tilt=20,
-                vertical_offset=-16.5,
+                vertical_offset=16.5,
                 click_fit_radius=1.25,
             ).move(Location((0, -40, 0))),
             # dovetail_split_line(
