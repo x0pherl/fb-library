@@ -208,108 +208,6 @@ def subpart_divots(
                 )
                 .rotate(Axis.Y, cut_angle),
             )
-
-    return divotedpart.part
-
-
-def oldsubpart_divots(
-    subpart: Part,
-    start: Point,
-    end: Point,
-    section: DovetailPart = DovetailPart.TAIL,
-    linear_offset=0,
-    tolerance=0.05,
-    tilt=0,
-    scarf_distance=0,
-    depth_ratio=1 / 6,
-    vertical_offset=0,
-    click_fit_radius=0,
-):
-
-    cut_angle = start.angle_to(end)
-
-    # if there's a scarf, the tail is at a different angle than the rest of the subpart
-    adjusted_top_divot_angle = (
-        tilt
-        if scarf_distance == 0
-        else tilt
-        - atan2(
-            subpart.bounding_box().size.Z - abs(vertical_offset),
-            scarf_distance,
-        )
-    )
-
-    # how much of an offset is there along the top and bottom of the subparts
-    tilt_offset = (
-        (subpart.bounding_box().size.Z - abs(click_fit_radius * 4))
-        * tan(radians(adjusted_top_divot_angle))
-        / 2
-    )
-
-    adjusted_scarf_distance = 0 if vertical_offset > 0 else 0
-
-    tailtop_z = (
-        subpart.bounding_box().max.Z
-        - click_fit_radius * 2
-        + (vertical_offset if vertical_offset < 0 else 0)
-    )
-
-    # the required adjustement when the top of the dovetail is not the top of the part
-    tailtop_offset = tailtop_z * tan(radians(adjusted_top_divot_angle))
-
-    topmode = (
-        Mode.SUBTRACT
-        if ((section == DovetailPart.TAIL) == (vertical_offset < 0))
-        else Mode.ADD
-    )
-
-    bottommode = (
-        Mode.ADD
-        if ((section == DovetailPart.SOCKET) == (vertical_offset >= 0))
-        else Mode.SUBTRACT
-    )
-
-    tail_center = midpoint(start, end).related_point(
-        cut_angle - 90,
-        start.distance_to(end) * depth_ratio
-        + abs(tolerance) * (2 if vertical_offset < 0 else -2)
-        + scarf_distance,
-    )
-
-    with BuildPart() as divotedpart:
-        add(subpart, mode=Mode.ADD)
-        print(
-            f"""cut angle = {cut_angle}
-        tilt offset = {tilt_offset}
-        tailtop_offset={tailtop_offset}
-        tolerance={tolerance}
-        vertical_offset={vertical_offset}
-        depth = {(start.distance_to(end) * depth_ratio)}
-        scarf_distance={scarf_distance}
-        magic number={-tailtop_offset - 3.9+ (start.distance_to(end) * depth_ratio)}
-        possible_solution = {start.distance_to(end) * depth_ratio - scarf_distance + abs(tolerance) * (2 if vertical_offset < 0 else -2)}
-        """
-        )
-        with BuildPart(
-            Location(
-                (
-                    tail_center.x,
-                    tail_center.y,
-                    tailtop_z,
-                )
-            ),
-            mode=topmode,
-        ):
-            add(
-                divot(click_fit_radius, positive=topmode == Mode.ADD)
-                .rotate(
-                    Axis.X,
-                    (90 * (-1 if vertical_offset < 0 else 1))
-                    + adjusted_top_divot_angle,
-                )
-                .rotate(Axis.Y, cut_angle),
-            )
-
         #####################################
         # Bottom divots
         #####################################
@@ -317,13 +215,13 @@ def oldsubpart_divots(
             cut_angle, click_fit_radius * 2
         ).related_point(
             cut_angle + 90,
-            tilt_offset + abs(tolerance) / (2 if vertical_offset < 0 else -2),
+            tilt_offset - ((click_fit_radius * 2) * tan(radians(tilt))),
         )
         end_side = end.related_point(
             cut_angle, -click_fit_radius * 2
         ).related_point(
             cut_angle - 90,
-            -tilt_offset - abs(tolerance) / (2 if vertical_offset < 0 else -2),
+            -tilt_offset + ((click_fit_radius * 2) * tan(radians(tilt))),
         )
         with BuildPart(
             Location(
