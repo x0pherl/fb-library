@@ -6,6 +6,8 @@
 
 Dovetail is intended for breaking large parts into a dovetail and socketed part that can be easily fitted together with very tight and precice tolerances. This might be useful, for example, when designed parts that cannot fit onto common 3d-printer beds, and must be broken into multiple parts.
 
+![example of a part split into a dovetail and a socket](dovetail.png)
+
 The `dovetail_subpart` function takes a build123d part and necesarry parameters to break it into either the dovetail or the socket component of the split.
 
 ## Arguments
