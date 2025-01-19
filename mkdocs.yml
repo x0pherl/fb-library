@@ -19,6 +19,6 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Developer’s Guide:
-    - clickfit: clickfit.md
+    - clickfit: click_fit.md
     - dovetail: dovetail.md
     - point: point.md

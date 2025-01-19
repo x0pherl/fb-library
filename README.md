@@ -1,33 +1,21 @@
-# Partomatic
+# fb-library Overview
 
-Partomatic is an attempt to build an automatable ecosystem for generating parametric models through automation -- making CI/CD automation possible for your 3d models.
+The Fender-Bender library began as a way to externalize and isolate some common [build123d](https://github.com/gumyr/build123d) utilities, functions, & methods from the [Fender-Bender](https://github.com/x0pherl/fender-bender) project.
 
-# The Partomatic philosophy
+It's grown to include some capabilities not required by that project. Useful components include:
+- dovetail: Splits a build123d `Part` object into two parts that can easily be slid together with very tight tolerances. Useful when building parts larger than your printer's build volume.
+- click_fit: a tapered profile that allows for better printing & assembly than a simple half Sphere to allow parts to "click" or snap into place when fit together. The extruded shape and the socket are both shaped carefully to allow a mix of easy assembly and good hold.
+- point -- a light-weight X,Y coordinate point object with some geometric functions built into the object.
 
-In the software world, CI/CD technologies are taken for granted. They allow large-scale distributed systems to deploy updates automatically and smoothly. These systems allow an automated flow that takes updated code submitted by a developer, executes tests & validations, and then automated global deployment. Without these technologies the internet as we know it could not operate.
+# Documentation
 
-3d Modeling tools are great at creating models, but they don’t make it easy to deploy, generate, and distribute multiple parts. Build123d is a powerful library, but it leaves the creation of final parts up to the developer.
+Complete developer documentation for fb-library is maintained in the docs folder and on the [fb-library documentation](https://fb-library.readthedocs.io) site.
 
-For a large project with many related and interlocking parts, this can make releasing a new version a project in and of itself. Partomatic allows for those designs to be parametric. For example, a wheel might support many different bearings, or come in multiple diameters or thicknesses. Instead of hard coding the saving of each of those STL files, Partomatic allows you to define parameters and file-naming instructions to allow a relatively simple build script to read through multiple configuration files and save each of those STL files in a folder structure and file-naming standard that you define.
+# Modifying the Source
+The included source files rely on the build123d library. I recommend following the build123d installation instructions.
 
-[Partomatic](https://github.com/x0pherl/partomatic) enables _parametric modeling_ and standardizes some _build automation_ for a part.
+# Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## Parametric Modeling
-Parametric 3D modeling is a method of creating 3D models where the geometry is defined by parameters, allowing for easy adjustment by simply changing the values of these parameters. This approach enables the creation of flexible and reusable designs that can be quickly adapted to different requirements.
-
-Using the partomatic library gives you built in support for loading parameters from YAML files -- YAML is a very human, readable format -- someone without any technology background can look at a yaml file that looks like:
-```
-wheel:
-    radius: 20
-    thickness: 4
-    bearing:
-        diameter: 5
-        thickness: 4
-```
-and understand how this represents these related parts
-
-## Partomatic Components
-There are 3 primary components to the partomatic library:
-- [AutomatablePart](automatable_part.md) — This dataclass represents a build123d part with augmentation to control the location of the part as well as the file name
-- [PartomaticConfig](partomatic_config.md) — This dataclass handles loading parameters from yaml strings or files.
-- [Partomatic](partomatic.md) — This is the base class for generating, displaying, and exporting 3d objects based on the parameters loaded in the _config member variable, which is a `PartomaticConfig` object.
+# License
+This project is licensed under the terms of the [MIT](https://choosealicense.com/licenses/mit/) license
