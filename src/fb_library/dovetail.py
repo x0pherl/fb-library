@@ -24,13 +24,14 @@ from build123d import (
 
 from build123d.objects_part import Cylinder, Sphere
 
-from fb_library.point import (
+# from fb_library.point import (
+from point import (
     Point,
     midpoint,
     shifted_midpoint,
 )
 
-from fb_library.click_fit import divot
+from click_fit import divot
 
 from ocp_vscode import show, Camera
 
@@ -52,7 +53,7 @@ def dovetail_subpart_outline(
     length_ratio=1 / 3,
     depth_ratio=1 / 6,
     tilt_offset=0,
-    straigthen_dovetail=False,
+    straighten_dovetail=False,
 ) -> Line:
     """
     given a part and a start and end point on the XY plane, returns an outline to build an intersection Part to generate the subpart
@@ -68,6 +69,8 @@ def dovetail_subpart_outline(
         - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
         - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
         - tilt_offset: setting this to a non-zero value will shift the dovetail to allow for tilt adjustemnt between the top & bottom outlines
+        - straighten_dovetail: setting this to True will draw the straight line of the cut,
+            allowing for the correct tolerances for the section
     """
     direction_multiplier = 1 if section == DovetailPart.TAIL else -1
     base_angle = start.angle_to(end)
@@ -113,7 +116,7 @@ def dovetail_subpart_outline(
             ),
             tuple(toleranced_end_point),
         )
-        if straigthen_dovetail:
+        if straighten_dovetail:
             Line(toleranced_start_point, toleranced_end_point)
         else:
             add(
@@ -145,6 +148,22 @@ def subpart_divots(
     vertical_offset=0,
     click_fit_radius=0,
 ):
+    """
+    adds/subtracts click-fit divots to subpart and returns it
+    ----------
+    Arguments:
+        - subpart: the part to add divots to
+        - start: the start point along the XY Plane for the dovetail line
+        - end: the end point along the XY Plane for the dovetail line
+        - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
+        - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
+        - tolerance: the tolerance for the split
+        - tilt: the tilt angle of the dovetail
+        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
+        - vertical_offset: the vertical offset of the dovetail
+        - click_fit_radius: the radius of the click-fit divots
+    """
 
     cut_angle = start.angle_to(end)
 
@@ -180,7 +199,9 @@ def subpart_divots(
         else Mode.SUBTRACT
     )
 
-    top_divot_center = midpoint(start, end).related_point(
+    top_divot_center = shifted_midpoint(
+        start, end, linear_offset
+    ).related_point(
         cut_angle - 90,
         -tilt_offset
         + start.distance_to(end) * depth_ratio
@@ -338,7 +359,7 @@ def dovetail_subpart(
                         length_ratio=length_ratio,
                         depth_ratio=depth_ratio,
                         tilt_offset=-tilt_offset,
-                        straigthen_dovetail=vertical_offset > 0,
+                        straighten_dovetail=vertical_offset > 0,
                     )
                 )
             make_face()
@@ -364,7 +385,7 @@ def dovetail_subpart(
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
                             tilt_offset=-tilt_offset + vertical_tilt_offset,
-                            straigthen_dovetail=True,
+                            straighten_dovetail=True,
                         )
                     )
                 make_face()
@@ -390,7 +411,7 @@ def dovetail_subpart(
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
                             tilt_offset=-tilt_offset + vertical_tilt_offset,
-                            straigthen_dovetail=False,
+                            straighten_dovetail=False,
                         )
                     )
                 make_face()
@@ -416,7 +437,7 @@ def dovetail_subpart(
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
                             tilt_offset=tilt_offset - vertical_tilt_offset,
-                            straigthen_dovetail=False,
+                            straighten_dovetail=False,
                         )
                     )
                 make_face()
@@ -442,7 +463,7 @@ def dovetail_subpart(
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
                             tilt_offset=tilt_offset - vertical_tilt_offset,
-                            straigthen_dovetail=True,
+                            straighten_dovetail=True,
                         )
                     )
                 make_face()
@@ -461,7 +482,7 @@ def dovetail_subpart(
                         length_ratio=length_ratio,
                         depth_ratio=depth_ratio,
                         tilt_offset=tilt_offset,
-                        straigthen_dovetail=vertical_offset < 0,
+                        straighten_dovetail=vertical_offset < 0,
                     )
                 )
             make_face()
@@ -615,6 +636,7 @@ if __name__ == "__main__":
                 # scarf_distance=2,
                 # scarf_distance=0,
                 section=DovetailPart.TAIL,
+                linear_offset=10,
                 tilt=20,
                 vertical_offset=16.5,
                 click_fit_radius=1.25,
@@ -626,6 +648,7 @@ if __name__ == "__main__":
                 scarf_distance=2,
                 # scarf_distance=0,
                 section=DovetailPart.SOCKET,
+                linear_offset=10,
                 tilt=20,
                 vertical_offset=16.5,
                 click_fit_radius=1.25,
