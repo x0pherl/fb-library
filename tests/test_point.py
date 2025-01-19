@@ -14,8 +14,8 @@ class TestPoint:
         assert x.X == 1
         assert x.Y == 2
 
-    def test_tuple(self):
-        x = Point((1, 2))
+    def test_list(self):
+        x = Point([1, 2])
         assert x[0] == 1
         assert x[1] == 2
         with pytest.raises(IndexError):

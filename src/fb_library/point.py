@@ -28,10 +28,10 @@ class Point:
         return self.y
 
     def __init__(
-        self, x: Union[float, Tuple[float, float]] = None, y: float = None
+        self, x: Union[float, list[float, float]] = None, y: float = None
     ):
         """initialze the point with x and y coordinates passed as a tuple or idividual values"""
-        if isinstance(x, tuple):
+        if isinstance(x, list) and len(x) >= 2:
             self.x, self.y = x
         else:
             self.x = x
@@ -53,7 +53,7 @@ class Point:
 
     def angle_to(self, point: "Point") -> float:
         """from the point, identify the angle to a second point"""
-        return degrees(atan2(point.y - self.y, point.x - self.x))
+        return degrees(atan2(point.y - self.y, point.x - self.x)) % 360
 
     def distance_to(self, point: "Point") -> float:
         """from the point, identify the distance to a second point"""
