@@ -21,4 +21,5 @@ nav:
   - Developer’s Guide:
     - clickfit: click_fit.md
     - dovetail: dovetail.md
-    - point: point.md
+    - HexWall: hexwall.md
+    - Point: point.md
