@@ -24,13 +24,15 @@ from build123d import (
 
 from build123d.objects_part import Cylinder, Sphere
 
-from fb_library.point import (
+# from fb_library.
+from point import (
     Point,
     midpoint,
     shifted_midpoint,
 )
 
-from fb_library.click_fit import divot
+# from fb_library.
+from click_fit import divot
 
 from ocp_vscode import show, Camera
 
@@ -48,10 +50,10 @@ def dovetail_subpart_outline(
     linear_offset=0,
     tolerance=0.05,
     tail_angle_offset=15,
-    scarf_distance=0,
+    taper_distance=0,
     length_ratio=1 / 3,
     depth_ratio=1 / 6,
-    tilt_offset=0,
+    scarf_offset=0,
     straighten_dovetail=False,
 ) -> Line:
     """
@@ -64,18 +66,18 @@ def dovetail_subpart_outline(
         - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
         - tolerance: the tolerance for the split
         - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
-        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - taper_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
         - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
         - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
-        - tilt_offset: setting this to a non-zero value will shift the dovetail to allow for tilt adjustemnt between the top & bottom outlines
+        - scarf_offset: setting this to a non-zero value will shift the dovetail to allow for tilt adjustemnt between the top & bottom outlines
         - straighten_dovetail: setting this to True will draw the straight line of the cut,
             allowing for the correct tolerances for the section
     """
     direction_multiplier = 1 if section == DovetailPart.TAIL else -1
     base_angle = start.angle_to(end)
     dovetail_tolerance = -(abs(tolerance / 2)) * direction_multiplier
-    adjusted_start_point = start.related_point(base_angle - 90, tilt_offset)
-    adjusted_end_point = end.related_point(base_angle - 90, tilt_offset)
+    adjusted_start_point = start.related_point(base_angle - 90, scarf_offset)
+    adjusted_end_point = end.related_point(base_angle - 90, scarf_offset)
     toleranced_start_point = adjusted_start_point.related_point(
         base_angle - 90, dovetail_tolerance
     )
@@ -126,7 +128,7 @@ def dovetail_subpart_outline(
                     linear_offset=linear_offset,
                     tolerance=tolerance,
                     tail_angle_offset=tail_angle_offset,
-                    scarf_distance=scarf_distance,
+                    taper_distance=taper_distance,
                     length_ratio=length_ratio,
                     depth_ratio=depth_ratio,
                 )
@@ -141,8 +143,8 @@ def subpart_divots(
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
     tolerance=0.05,
-    tilt=0,
-    scarf_distance=0,
+    scarf_angle=0,
+    taper_angle=0,
     depth_ratio=1 / 6,
     vertical_offset=0,
     click_fit_radius=0,
@@ -157,8 +159,8 @@ def subpart_divots(
         - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
         - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
         - tolerance: the tolerance for the split
-        - tilt: the tilt angle of the dovetail
-        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - scarf_angle: the scarf angle of the dovetail
+        - taper_angle: an extra shrinking factor for the dovetail size, allows for easier assembly
         - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
         - vertical_offset: the vertical offset of the dovetail
         - click_fit_radius: the radius of the click-fit divots
@@ -167,24 +169,32 @@ def subpart_divots(
     cut_angle = start.angle_to(end)
 
     # how much of an offset is there along the top and bottom of the subparts
-    tilt_offset = (subpart.bounding_box().size.Z) * tan(radians(tilt)) / 2
+    scarf_offset = (
+        (subpart.bounding_box().size.Z) * tan(radians(scarf_angle)) / 2
+    )
 
     tailtop_z = subpart.bounding_box().max.Z + (
         vertical_offset if vertical_offset < 0 else 0
     )
-    # if there's a scarf, the tail is at a different angle than the rest of the subpart
-    adjusted_top_divot_angle = (
-        tilt
-        if scarf_distance == 0
-        else tilt
-        + (degrees(atan((scarf_distance + abs(tolerance * 4)) / tailtop_z)))
+
+    adjusted_top_divot_angle = scarf_angle + taper_angle * (
+        (
+            (subpart.bounding_box().max.Z - abs(vertical_offset))
+            / subpart.bounding_box().max.Z
+        )
     )
 
     # the required adjustement when the top of the dovetail is not the top of the part
     tailtop_offset = (
         tailtop_z
         * tan(radians(abs(adjusted_top_divot_angle)))
-        * (-1 if tilt < 0 else 1)
+        * (-1 if scarf_angle < 0 else 1)
+    )
+
+    taper_offset = (
+        (subpart.bounding_box().size.Z - abs(vertical_offset))
+        * tan(radians(taper_angle))
+        / 2
     )
 
     topmode = (
@@ -202,11 +212,8 @@ def subpart_divots(
         start, end, linear_offset
     ).related_point(
         cut_angle - 90,
-        -tilt_offset
+        +scarf_offset
         + start.distance_to(end) * depth_ratio
-        + abs(tolerance) * (0.5 if vertical_offset < 0 else -0.5)
-        - scarf_distance
-        + tailtop_offset
         - ((click_fit_radius * 2) * tan(radians(adjusted_top_divot_angle))),
     )
     with BuildPart() as divotedpart:
@@ -241,13 +248,15 @@ def subpart_divots(
             cut_angle, click_fit_radius * 2
         ).related_point(
             cut_angle + 90,
-            tilt_offset - ((click_fit_radius * 2) * tan(radians(tilt))),
+            scarf_offset
+            - ((click_fit_radius * 2) * tan(radians(scarf_angle))),
         )
         end_side = end.related_point(
             cut_angle, -click_fit_radius * 2
         ).related_point(
             cut_angle - 90,
-            -tilt_offset + ((click_fit_radius * 2) * tan(radians(tilt))),
+            -scarf_offset
+            + ((click_fit_radius * 2) * tan(radians(scarf_angle))),
         )
         with BuildPart(
             Location(
@@ -266,7 +275,8 @@ def subpart_divots(
                     extend_base=True,
                 )
                 .rotate(
-                    Axis.X, (90 * (1 if vertical_offset < 0 else -1)) + tilt
+                    Axis.X,
+                    (90 * (1 if vertical_offset < 0 else -1)) + scarf_angle,
                 )
                 .rotate(Axis.Y, cut_angle),
             )
@@ -278,7 +288,7 @@ def subpart_divots(
                 divot(click_fit_radius, positive=True, extend_base=True)
                 .rotate(
                     Axis.X,
-                    (90 * (1 if vertical_offset < 0 else -1)) + tilt,
+                    (90 * (1 if vertical_offset < 0 else -1)) + scarf_angle,
                 )
                 .rotate(Axis.Y, cut_angle),
             )
@@ -294,10 +304,10 @@ def dovetail_subpart(
     linear_offset=0,
     tolerance=0.05,
     tail_angle_offset=15,
-    scarf_distance=0,
+    taper_angle=0,
     length_ratio=1 / 3,
     depth_ratio=1 / 6,
-    tilt=0,
+    scarf_angle=0,
     vertical_offset=0,
     click_fit_radius=0,
 ) -> Part:
@@ -311,10 +321,10 @@ def dovetail_subpart(
         - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
         - tolerance: the tolerance for the split
         - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
-        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - taper_angle: an extra shrinking factor for the dovetail size, allows for easier assembly
         - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
         - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
-        - tilt: setting this to a non-zero value will tilt the dovetail along the Z axis which may improve part stability
+        - scarf_angle: setting this to a non-zero value will tilt the dovetail along the Z axis which may improve part stability
         - vertical_offset: offsets the dovetail along the Z axis by the ammount specified, which results in a straight line
             cut on one side, and provides a hard stop for fitting. A positive number results in a straight cut on the bottom
             of the part passed, a negagive number results in a straight cut on the top of the part passed
@@ -330,16 +340,21 @@ def dovetail_subpart(
         raise ValueError(
             "Vertical offset cannot be greater than the part's height"
         )
-    if vertical_offset < 0 and scarf_distance > 0:
+    if vertical_offset < 0 and taper_angle > 0:
         raise ValueError(
-            "a postive scarf_distance and a negative vertical_offset will result in an invalid dovetail"
+            "a positive taper_angle and a negative vertical_offset will result in an invalid dovetail"
         )
-    if vertical_offset > 0 and scarf_distance < 0:
+    if vertical_offset > 0 and taper_angle < 0:
         raise ValueError(
-            "a negative scarf_distance and a positive vertical_offset will result in an invalid dovetail"
+            "a negative taper_angle and a positive vertical_offset will result in an invalid dovetail"
         )
-    tilt_offset = (part.bounding_box().size.Z) * tan(radians(tilt)) / 2
-    vertical_tilt_offset = abs(vertical_offset) * tan(radians(tilt))
+    scarf_offset = (part.bounding_box().size.Z) * tan(radians(scarf_angle)) / 2
+    vertical_scarf_offset = abs(vertical_offset) * tan(radians(scarf_angle))
+    taper_offset = (
+        (part.bounding_box().size.Z - abs(vertical_offset))
+        * tan(radians(taper_angle))
+        / 2
+    )
     with BuildPart() as intersect:
         with BuildSketch(Plane.XY.offset(part.bounding_box().min.Z)):
             with BuildLine():
@@ -352,12 +367,12 @@ def dovetail_subpart(
                         linear_offset=linear_offset,
                         tolerance=tolerance,
                         tail_angle_offset=tail_angle_offset,
-                        scarf_distance=(
-                            scarf_distance if vertical_offset <= 0 else 0
+                        taper_distance=(
+                            taper_offset if vertical_offset <= 0 else 0
                         ),
                         length_ratio=length_ratio,
                         depth_ratio=depth_ratio,
-                        tilt_offset=-tilt_offset,
+                        scarf_offset=-scarf_offset,
                         straighten_dovetail=vertical_offset > 0,
                     )
                 )
@@ -380,10 +395,10 @@ def dovetail_subpart(
                             linear_offset=linear_offset,
                             tolerance=tolerance,
                             tail_angle_offset=tail_angle_offset,
-                            scarf_distance=0,
+                            taper_distance=0,
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
-                            tilt_offset=-tilt_offset + vertical_tilt_offset,
+                            scarf_offset=-scarf_offset + vertical_scarf_offset,
                             straighten_dovetail=True,
                         )
                     )
@@ -406,10 +421,10 @@ def dovetail_subpart(
                             linear_offset=linear_offset,
                             tolerance=tolerance,
                             tail_angle_offset=tail_angle_offset,
-                            scarf_distance=scarf_distance,
+                            taper_distance=taper_offset,
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
-                            tilt_offset=-tilt_offset + vertical_tilt_offset,
+                            scarf_offset=-scarf_offset + vertical_scarf_offset,
                             straighten_dovetail=False,
                         )
                     )
@@ -432,10 +447,10 @@ def dovetail_subpart(
                             linear_offset=linear_offset,
                             tolerance=tolerance,
                             tail_angle_offset=tail_angle_offset,
-                            scarf_distance=0,
+                            taper_distance=0,
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
-                            tilt_offset=tilt_offset - vertical_tilt_offset,
+                            scarf_offset=scarf_offset - vertical_scarf_offset,
                             straighten_dovetail=False,
                         )
                     )
@@ -458,10 +473,10 @@ def dovetail_subpart(
                             linear_offset=linear_offset,
                             tolerance=tolerance,
                             tail_angle_offset=tail_angle_offset,
-                            scarf_distance=0,
+                            taper_distance=0,
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
-                            tilt_offset=tilt_offset - vertical_tilt_offset,
+                            scarf_offset=scarf_offset - vertical_scarf_offset,
                             straighten_dovetail=True,
                         )
                     )
@@ -477,10 +492,10 @@ def dovetail_subpart(
                         linear_offset=linear_offset,
                         tolerance=tolerance,
                         tail_angle_offset=tail_angle_offset,
-                        scarf_distance=0,
+                        taper_distance=0,
                         length_ratio=length_ratio,
                         depth_ratio=depth_ratio,
-                        tilt_offset=tilt_offset,
+                        scarf_offset=scarf_offset,
                         straighten_dovetail=vertical_offset < 0,
                     )
                 )
@@ -495,8 +510,8 @@ def dovetail_subpart(
                 section,
                 linear_offset,
                 tolerance,
-                tilt,
-                scarf_distance,
+                scarf_angle,
+                taper_angle,
                 depth_ratio,
                 vertical_offset,
                 click_fit_radius,
@@ -512,7 +527,7 @@ def dovetail_split_line(
     linear_offset=0,
     tolerance=0.05,
     tail_angle_offset=15,
-    scarf_distance=0,
+    taper_distance=0,
     length_ratio=1 / 3,
     depth_ratio=1 / 6,
 ) -> Line:
@@ -526,7 +541,7 @@ def dovetail_split_line(
         - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
         - tolerance: the tolerance for the split
         - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
-        - scarf_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - taper_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
         - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
         - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
     """
@@ -548,7 +563,7 @@ def dovetail_split_line(
         length / 2
         - tongue_length / 2
         - dovetail_tolerance * 1.5
-        + scarf_distance
+        + taper_distance
         + linear_offset,
     )
 
@@ -557,24 +572,24 @@ def dovetail_split_line(
         length / 2
         + tongue_length / 2
         + dovetail_tolerance * 1.5
-        - scarf_distance
+        - taper_distance
         + linear_offset,
     )
     # tail_end_start = tail_base_start.related_point(
     #     base_angle - 90 - tail_angle_offset,
-    #     tongue_depth - scarf_distance,
+    #     tongue_depth - taper_distance,
     # )
-    tail_angle_extension = (tongue_depth - scarf_distance) * tan(
+    tail_angle_extension = (tongue_depth - taper_distance) * tan(
         radians(tail_angle_offset)
     )
     tail_end_start = tail_base_start.related_point(
         base_angle - 90,
-        tongue_depth - scarf_distance,
+        tongue_depth - taper_distance,
     ).related_point(base_angle, -tail_angle_extension)
 
     tail_end = tail_base_resume.related_point(
         base_angle - 90,
-        tongue_depth - scarf_distance,
+        tongue_depth - taper_distance,
     ).related_point(base_angle, tail_angle_extension)
     adjusted_end_point = adjusted_start_point.related_point(base_angle, length)
 
@@ -632,11 +647,12 @@ if __name__ == "__main__":
                 test.part,
                 Point(-25, 0),
                 Point(25, 0),
-                # scarf_distance=2,
-                # scarf_distance=0,
+                taper_angle=5,
+                # taper_distance=2,
+                # taper_distance=0,
                 section=DovetailPart.TAIL,
                 linear_offset=10,
-                tilt=20,
+                scarf_angle=20,
                 vertical_offset=16.5,
                 click_fit_radius=1.25,
             ),
@@ -644,11 +660,12 @@ if __name__ == "__main__":
                 test.part,
                 Point(-25, 0),
                 Point(25, 0),
-                scarf_distance=2,
-                # scarf_distance=0,
+                taper_angle=5,
+                # taper_distance=2,
+                # taper_distance=0,
                 section=DovetailPart.SOCKET,
                 linear_offset=10,
-                tilt=20,
+                scarf_angle=20,
                 vertical_offset=16.5,
                 click_fit_radius=1.25,
             ).move(Location((0, -40, 0))),
@@ -656,27 +673,27 @@ if __name__ == "__main__":
             #     # test.part,
             #     Point(-5, 0),
             #     Point(5, 0),
-            #     scarf_distance=0.5,
+            #     taper_distance=0.5,
             #     section=DovetailPart.SOCKET,
-            #     # tilt=20,
+            #     # scarf_angle=20,
             # ),
             # dovetail_split_line(
             #     # test.part,
             #     Point(-5, 0),
             #     Point(5, 0),
-            #     scarf_distance=0.5,
+            #     taper_distance=0.5,
             #     tail_angle_offset=0,
             #     section=DovetailPart.SOCKET,
-            #     # tilt=20,
+            #     # scarf_angle=20,
             # ),
             # dovetail_split_line(
             #     # test.part,
             #     Point(-5, 0),
             #     Point(5, 0),
-            #     scarf_distance=0.5,
+            #     taper_distance=0.5,
             #     tail_angle_offset=35,
             #     section=DovetailPart.SOCKET,
-            #     # tilt=20,
+            #     # scarf_angle=20,
             # ),
             reset_camera=Camera.KEEP,
         )
