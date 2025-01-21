@@ -24,15 +24,13 @@ from build123d import (
 
 from build123d.objects_part import Cylinder, Sphere
 
-# from fb_library.
-from point import (
+from fb_library.point import (
     Point,
     midpoint,
     shifted_midpoint,
 )
 
-# from fb_library.
-from click_fit import divot
+from fb_library.click_fit import divot
 
 from ocp_vscode import show, Camera
 
