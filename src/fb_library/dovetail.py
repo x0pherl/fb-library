@@ -46,7 +46,7 @@ def dovetail_subpart_outline(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.05,
+    tolerance=0.025,
     tail_angle_offset=15,
     taper_distance=0,
     length_ratio=1 / 3,
@@ -140,7 +140,7 @@ def subpart_divots(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.05,
+    tolerance=0.025,
     scarf_angle=0,
     taper_angle=0,
     depth_ratio=1 / 6,
@@ -285,7 +285,7 @@ def dovetail_subpart(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.05,
+    tolerance=0.025,
     tail_angle_offset=15,
     taper_angle=0,
     length_ratio=1 / 3,
@@ -315,7 +315,7 @@ def dovetail_subpart(
     dovetail_tolerance = 0 if vertical_offset == 0 else abs(tolerance) / 2
     vertical_tolerance_adjustment = (
         dovetail_tolerance
-        * (1 if section == DovetailPart.TAIL else -1)
+        * (4 if section == DovetailPart.TAIL else -4)
         * (1 if vertical_offset > 0 else -1)
     )
 
@@ -515,7 +515,7 @@ def dovetail_split_line(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
-    tolerance=0.05,
+    tolerance=0.025,
     tail_angle_offset=15,
     taper_distance=0,
     length_ratio=1 / 3,
@@ -637,9 +637,9 @@ if __name__ == "__main__":
                 # taper_distance=2,
                 # taper_distance=0,
                 section=DovetailPart.TAIL,
-                linear_offset=10,
+                linear_offset=-10,
                 scarf_angle=20,
-                vertical_offset=-10,
+                vertical_offset=10,
                 click_fit_radius=1.25,
             ),
             dovetail_subpart(
@@ -650,11 +650,11 @@ if __name__ == "__main__":
                 # taper_distance=2,
                 # taper_distance=0,
                 section=DovetailPart.SOCKET,
-                linear_offset=10,
+                linear_offset=-10,
                 scarf_angle=20,
-                vertical_offset=-10,
+                vertical_offset=10,
                 click_fit_radius=1.25,
-            ).move(Location((0, -40, 0))),
+            ).move(Location((0, 0, 0))),
             dovetail_split_line(
                 Point(-25, 0),
                 Point(25, 0),
