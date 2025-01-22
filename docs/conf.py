@@ -13,8 +13,8 @@
 import os
 import sys
 
-partomatic_path = os.path.dirname(os.path.abspath(os.getcwd()))
-source_files_path = os.path.join(partomatic_path, "src", "partomatic")
+fb_library_path = os.path.dirname(os.path.abspath(os.getcwd()))
+source_files_path = os.path.join(fb_library_path, "src", "fb_library")
 sys.path.insert(0, source_files_path)
 sys.path.append(os.path.abspath("sphinxext"))
 sys.path.insert(0, os.path.abspath("."))
@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 
-project = "partomatic"
+project = "fb-library"
 copyright = "2024, x0pherl"
 author = "x0pherl"
 

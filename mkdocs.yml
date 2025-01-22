@@ -1,5 +1,5 @@
-site_name: Partomatic
-site_url: https://partomatic.readthedocs.io/
+site_name: fb-library
+site_url: https://fb-library.readthedocs.io/
 theme:
   name: material
   features:
