@@ -24,13 +24,15 @@ from build123d import (
 
 from build123d.objects_part import Cylinder, Sphere
 
-from fb_library.point import (
+# from fb_library.
+from point import (
     Point,
     midpoint,
     shifted_midpoint,
 )
 
-from fb_library.click_fit import divot
+# from fb_library.
+from click_fit import divot
 
 from ocp_vscode import show, Camera
 
@@ -286,6 +288,7 @@ def dovetail_subpart(
     section: DovetailPart = DovetailPart.TAIL,
     linear_offset=0,
     tolerance=0.025,
+    vertical_tolerance=0.2,
     tail_angle_offset=15,
     taper_angle=0,
     length_ratio=1 / 3,
@@ -312,13 +315,6 @@ def dovetail_subpart(
             cut on one side, and provides a hard stop for fitting. A positive number results in a straight cut on the bottom
             of the part passed, a negagive number results in a straight cut on the top of the part passed
     """
-    dovetail_tolerance = 0 if vertical_offset == 0 else abs(tolerance) / 2
-    vertical_tolerance_adjustment = (
-        dovetail_tolerance
-        * (4 if section == DovetailPart.TAIL else -4)
-        * (1 if vertical_offset > 0 else -1)
-    )
-
     if abs(vertical_offset) > part.bounding_box().size.Z:
         raise ValueError(
             "Vertical offset cannot be greater than the part's height"
@@ -331,13 +327,27 @@ def dovetail_subpart(
         raise ValueError(
             "a positive taper_angle and a positive vertical_offset will result in an invalid dovetail"
         )
+    # dovetail_tolerance = 0 if vertical_offset == 0 else abs(tolerance) / 2
+    # vertical_tolerance_adjustment = (
+    #     dovetail_tolerance
+    #     * (4 if section == DovetailPart.TAIL else -4)
+    #     * (1 if vertical_offset > 0 else -1)
+    # )
+    # dovetail_tolerance = 0 if vertical_offset == 0 else abs(tolerance) / 2
+    vertical_tolerance_adjustment = (
+        vertical_tolerance
+        * (1 if section == DovetailPart.TAIL else -1)
+        * (1 if vertical_offset > 0 else -1)
+    )
     scarf_offset = (part.bounding_box().size.Z) * tan(radians(scarf_angle)) / 2
-    vertical_scarf_offset = abs(vertical_offset) * tan(radians(scarf_angle))
+    vertical_scarf_offset = (
+        abs(vertical_offset) - vertical_tolerance_adjustment
+    ) * tan(radians(scarf_angle))
+
     taper_offset = (
         part.bounding_box().size.Z
         - abs(vertical_offset)
-        - abs(tolerance) * 2
-        - click_fit_radius * 2
+        - vertical_tolerance_adjustment
     ) * tan(radians(abs(taper_angle)))
     with BuildPart() as intersect:
         with BuildSketch(Plane.XY.offset(part.bounding_box().min.Z)):
@@ -628,40 +638,42 @@ def dovetail_split_line(
 if __name__ == "__main__":
     with BuildPart(mode=Mode.PRIVATE) as test:
         Box(50, 40, 50, align=(Align.CENTER, Align.CENTER, Align.MIN))
-        show(
-            dovetail_subpart(
-                test.part,
-                Point(-25, 0),
-                Point(25, 0),
-                taper_angle=5,
-                # taper_distance=2,
-                # taper_distance=0,
-                section=DovetailPart.TAIL,
-                linear_offset=-10,
-                scarf_angle=20,
-                vertical_offset=10,
-                click_fit_radius=1.25,
-            ),
-            dovetail_subpart(
-                test.part,
-                Point(-25, 0),
-                Point(25, 0),
-                taper_angle=5,
-                # taper_distance=2,
-                # taper_distance=0,
-                section=DovetailPart.SOCKET,
-                linear_offset=-10,
-                scarf_angle=20,
-                vertical_offset=10,
-                click_fit_radius=1.25,
-            ).move(Location((0, 0, 0))),
-            dovetail_split_line(
-                Point(-25, 0),
-                Point(25, 0),
-                section=DovetailPart.SOCKET,
-                linear_offset=10,
-                taper_distance=0,
-                # scarf_angle=20,
-            ).move(Location((0, 9, 0))),
-            reset_camera=Camera.KEEP,
-        )
+    tl = (
+        dovetail_subpart(
+            test.part,
+            Point(-25, 0),
+            Point(25, 0),
+            section=DovetailPart.TAIL,
+            tolerance=0.0125,
+            vertical_tolerance=0.2,
+            taper_angle=2,
+            scarf_angle=20,
+            vertical_offset=-16.5,
+            click_fit_radius=1.25,
+        ).move(Location((0, 0.1, 0))),
+    )
+    sckt = dovetail_subpart(
+        test.part,
+        Point(-25, 0),
+        Point(25, 0),
+        section=DovetailPart.SOCKET,
+        tolerance=0.0125,
+        vertical_tolerance=0.2,
+        taper_angle=2,
+        scarf_angle=20,
+        vertical_offset=-16.5,
+        click_fit_radius=1.25,
+    )
+    spline = (
+        dovetail_split_line(
+            Point(-25, 0),
+            Point(25, 0),
+            section=DovetailPart.SOCKET,
+            linear_offset=10,
+            taper_distance=0,
+            # scarf_angle=20,
+        ).move(Location((0, 9, 0))),
+    )
+    from build123d import export_stl
+
+    show(tl, sckt, spline, reset_camera=Camera.KEEP)
