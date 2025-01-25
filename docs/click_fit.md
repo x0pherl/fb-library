@@ -6,27 +6,57 @@ The `click_fit` module provides a divot function to create parts for snap fit co
 
 ## Functions
 
-### divot
+### twist_snap_connector
 
-Creates a divot that can be used to create a snap fit connector.
+#### arguments
 
-#### Arguments
+ - connector_diameter: the base diamaeter of the connector mechanism
+ - tolerance: the spacing between the connector and the socket
+ - arc_percentage: the percentage of the arc that the snapfit will cover
+ - snapfit_count: how many snapfit mechanisms to add
+ - snapfit_radius_extension: how far beyond the connector the snapfit extends
+ - wall_width: the thickness of the wall mechanism
+ - wall_depth: the depth of the wall mechanism
+ - snapfit_height: the height of the snapfit mechanism
 
-- `radius` (float, default=0.5): The radius of the divot.
-- `positive` (bool, default=True): When `True`, reduces the size and shaping of the divot for the extruded part. When `False`, deepens and widens the socket.
-- `extend_base` (bool, default=False): When `True`, extends the base of the divot to allow for a clean connection when attaching without precise placement.
+### twist_snap_socket
 
-#### Returns
+#### arguments
 
-- `Part`: The created divot part.
+ - connector_diameter: the base diamaeter of the connector mechanism
+ - tolerance: the spacing between the connector and the socket
+ - arc_percentage: the percentage of the arc that the snapfit will cover
+ - snapfit_count: how many snapfit mechanisms to add
+ - snapfit_radius_extension: how far beyond the connector the snapfit extends
+ - wall_width: the thickness of the wall mechanism
+ - wall_depth: the depth of the wall mechanism
+ - snapfit_height: the height of the snapfit mechanism
 
-#### Example
+## Example
+```
+from fb_library import twist_snap_connector, twist_snap_socket
 
-```python
-from fb_library import divot
+   connector = (
+        twist_snap_connector(
+            connector_diameter=4.5,
+            tolerance=0.12,
+            snapfit_height=2,
+            snapfit_radius_extension=2 * (2 / 3) - 0.06,
+            wall_width=2,
+            wall_depth=2,
+        )
+        .rotate(Axis.X, 180)
+        .move(Location((0, 0, 15)))
+    )
+    socket = twist_snap_socket(
+        connector_diameter=4.5,
+        tolerance=0.12,
+        snapfit_height=2,
+        snapfit_radius_extension=2 * (2 / 3) - 0.06,
+        wall_width=2,
+        wall_depth=2,
+    )
 
-# Create a positive divot with a radius of 0.5
-positive_divot = divot(radius=0.5, positive=True)
+    show(connector, socket, reset_camera=Camera.KEEP)
 
-# Create a negative divot with a radius of 0.5 and extended base
-negative_divot = divot(radius=0.5, positive=False, extend_base=True)
+```
