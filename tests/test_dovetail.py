@@ -12,6 +12,7 @@ from fb_library.point import Point
 
 from fb_library.dovetail import (
     DovetailPart,
+    DovetailStyle,
     dovetail_split_line,
     dovetail_subpart,
 )
@@ -65,7 +66,7 @@ class TestDovetail:
                 ),
             )
 
-    def test_valid_tail(self):
+    def test_valid_traditional_tail(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
             Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
         with BuildPart() as tail:
@@ -76,6 +77,7 @@ class TestDovetail:
                     Point(5, 0),
                     # scarf_distance=0.5,
                     section=DovetailPart.TAIL,
+                    style=DovetailStyle.TRADITIONAL,
                     # tilt=20,
                     vertical_offset=0.5,
                 ),
@@ -95,6 +97,44 @@ class TestDovetail:
                     section=DovetailPart.SOCKET,
                     scarf_angle=20,
                     vertical_offset=-0.5,
+                ),
+            )
+        assert socket.part.is_valid()
+
+    def test_valid_snugtail_tail(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with BuildPart() as tail:
+            add(
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    # scarf_distance=0.5,
+                    section=DovetailPart.TAIL,
+                    style=DovetailStyle.SNUGTAIL,
+                    # tilt=20,
+                    vertical_offset=0.5,
+                    click_fit_radius=1,
+                ),
+            )
+        assert tail.part.is_valid()
+
+    def test_valid_snugtail_socket(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with BuildPart() as socket:
+            add(
+                dovetail_subpart(
+                    test.part,
+                    Point(-5, 0),
+                    Point(5, 0),
+                    taper_angle=1,
+                    section=DovetailPart.SOCKET,
+                    style=DovetailStyle.SNUGTAIL,
+                    scarf_angle=20,
+                    vertical_offset=-0.5,
+                    click_fit_radius=1,
                 ),
             )
         assert socket.part.is_valid()
