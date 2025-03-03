@@ -584,7 +584,11 @@ def snugtail_divots(
         add(subpart, mode=Mode.ADD)
         with BuildPart(
             Location(
-                (0, part_width * length_ratio * 1.5, click_fit_radius * 2)
+                (
+                    0,
+                    part_width * length_ratio * 1.5 + midpoint(start, end).Y,
+                    click_fit_radius * 2,
+                )
             ),
             mode=Mode.SUBTRACT if section == DovetailPart.SOCKET else Mode.ADD,
         ):
@@ -1024,31 +1028,31 @@ def dovetail_split_line(
 
 if __name__ == "__main__":
     with BuildPart(mode=Mode.PRIVATE) as test:
-        Box(50, 70, 30, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        Box(50, 170, 30, align=(Align.CENTER, Align.CENTER, Align.MIN))
     tl = dovetail_subpart(
         test.part,
-        Point(-25, 0),
-        Point(25, 0),
+        Point(-25, 30),
+        Point(25, 30),
         section=DovetailPart.TAIL,
         style=DovetailStyle.SNUGTAIL,
         tolerance=0.0125,
         vertical_tolerance=0.2,
         taper_angle=2,
         scarf_angle=20,
-        vertical_offset=-10,
+        vertical_offset=0,
         click_fit_radius=1,
     ).move(Location((0, 50, 0)))
     sckt = dovetail_subpart(
         test.part,
-        Point(-25, 0),
-        Point(25, 0),
+        Point(-25, 30),
+        Point(25, 30),
         section=DovetailPart.SOCKET,
         style=DovetailStyle.SNUGTAIL,
         tolerance=0.0125,
         vertical_tolerance=0.2,
         taper_angle=2,
         scarf_angle=20,
-        vertical_offset=-10,
+        vertical_offset=0,
         click_fit_radius=1,
     )
     splines = snugtail_subpart_outline(

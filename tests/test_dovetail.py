@@ -80,6 +80,7 @@ class TestDovetail:
                     style=DovetailStyle.TRADITIONAL,
                     # tilt=20,
                     vertical_offset=0.5,
+                    click_fit_radius=0.5,
                 ),
             )
         assert tail.part.is_valid()
