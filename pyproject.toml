@@ -1,6 +1,6 @@
 [project]
 name = "fb-library"
-version = "0.0.14"
+version = "0.0.15"
 authors = [
   { name="x0pherl"},
 ]
@@ -14,8 +14,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/x0pher/fb-library"
-Issues = "https://github.com/x0pher/fb-library/issues"
+Homepage = "https://github.com/x0pherl/fb-library"
+Issues = "https://github.com/x0pherl/fb-library/issues"
 Documentation = "https://fb-library.readthedocs.org"
 
 [build-system]
