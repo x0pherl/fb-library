@@ -89,7 +89,7 @@ def twist_snap_connector(
             path = path.rotate(Axis.Z, 90)
             with BuildSketch(path ^ 0):
                 Polygon(
-                    (
+                    *[
                         (0, 0),
                         (snapfit_radius_extension, 0),
                         (
@@ -97,7 +97,7 @@ def twist_snap_connector(
                             snapfit_height,
                         ),
                         (0, snapfit_height / 2),
-                    ),
+                    ],
                     align=(Align.MAX, Align.MIN),
                 )
             sweep(path=path)
@@ -176,7 +176,7 @@ def twist_snap_socket(
             path = path.rotate(Axis.Z, 90)
             with BuildSketch(path ^ 0):
                 Polygon(
-                    (
+                    *[
                         (0, 0),
                         (snapfit_radius_extension, 0),
                         (
@@ -184,7 +184,7 @@ def twist_snap_socket(
                             snapfit_height * 2,
                         ),
                         (0, snapfit_height * 2),
-                    ),
+                    ],
                     align=(Align.MAX, Align.MIN),
                 )
             sweep(path=path)
@@ -203,7 +203,7 @@ def twist_snap_socket(
             path = path.rotate(Axis.Z, 90)
             with BuildSketch(path ^ 0):
                 Polygon(
-                    (
+                    *[
                         (0, 0),
                         (
                             snapfit_radius_extension + tolerance,
@@ -217,7 +217,7 @@ def twist_snap_socket(
                             0,
                             snapfit_height / 2 + tolerance,
                         ),
-                    ),
+                    ],
                     align=(Align.MAX, Align.MIN),
                 )
             sweep(path=path)
