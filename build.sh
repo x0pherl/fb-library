@@ -3,6 +3,10 @@
 set -e
 
 PROJECT_NAME="fb-library"
+# Define the test command as a variable
+TEST_CMD="exec(\"from partomatic import Partomatic, PartomaticConfig, AutomatablePart\nprint(PartomaticConfig().stl_folder)\")"
+# Define sleep time for PyPI availability
+PYPI_WAIT_TIME=30
 
 read -p "Do you want to run pytest --cov ([Y]/N)? " PYTEST_CHOSEN
 PYTEST_CHOSEN=${PYTEST_CHOSEN:-Y}
@@ -24,16 +28,16 @@ python3 -m build
 pip3 install -e .
 
 # # Local testß
-python3 -c "from fb_library import dovetail_subpart, click_fit, Point, shifted_midpoint; print(shifted_midpoint(Point(0,0), Point(10,10),0))"
+python3 -c "$TEST_CMD"
 
 read -p "Based on that simple test, upload to PyPI? ([Y]/N)? " PYPI_UPLOAD
 PYPI_UPLOAD=${PYPI_UPLOAD:-Y}
 if [[ "$PYPI_UPLOAD" =~ ^[Yy]$ ]]; then
     python3 -m twine upload dist/*
     pip3 uninstall -y "$PROJECT_NAME" || true
-    sleep 30
+    sleep $PYPI_WAIT_TIME
     pip3 install "$PROJECT_NAME"
-    python3 -c "from fb_library import dovetail_subpart, click_fit, Point, shifted_midpoint; print(shifted_midpoint(Point(0,0), Point(10,10),0))"
+    python3 -c "$TEST_CMD"
     echo "REMINDER!!! Commit and push git changes!!!"
 else
     echo "Upload to PyPI skipped."
