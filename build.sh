@@ -17,22 +17,23 @@ if [[ "$PYTEST_CHOSEN" =~ ^[Yy]$ ]]; then
 fi
 
 # Build process
-pip uninstall -y "$PROJECT_NAME" || true
+pip3 uninstall -y "$PROJECT_NAME" || true
 rm -rf dist/*
 
-python -m build
-pip install -e .
+python3 -m build
+pip3 install -e .
 
-# # Local test
-python -c "from fb_library import dovetail_subpart, click_fit, Point, shifted_midpoint; print(shifted_midpoint(Point(0,0), Point(10,10),0))"
+# # Local testß
+python3 -c "from fb_library import dovetail_subpart, click_fit, Point, shifted_midpoint; print(shifted_midpoint(Point(0,0), Point(10,10),0))"
 
 read -p "Based on that simple test, upload to PyPI? ([Y]/N)? " PYPI_UPLOAD
 PYPI_UPLOAD=${PYPI_UPLOAD:-Y}
 if [[ "$PYPI_UPLOAD" =~ ^[Yy]$ ]]; then
-    python -m twine upload dist/*
-    pip uninstall -y "$PROJECT_NAME"
-    pip install "$PROJECT_NAME"
-    python -c "from fb_library import dovetail_subpart, click_fit, Point, shifted_midpoint; print(shifted_midpoint(Point(0,0), Point(10,10),0))"
+    python3 -m twine upload dist/*
+    pip3 uninstall -y "$PROJECT_NAME" || true
+    sleep 30
+    pip3 install "$PROJECT_NAME"
+    python3 -c "from fb_library import dovetail_subpart, click_fit, Point, shifted_midpoint; print(shifted_midpoint(Point(0,0), Point(10,10),0))"
     echo "REMINDER!!! Commit and push git changes!!!"
 else
     echo "Upload to PyPI skipped."
