@@ -45,9 +45,6 @@ from fb_library.point import (
 
 from fb_library.click_fit import divot
 
-from ocp_vscode import show, Camera
-
-
 class DovetailPart(Enum):
     TAIL = auto()
     SOCKET = auto()
@@ -703,6 +700,8 @@ def dovetail_subpart(
             cut on one side, and provides a hard stop for fitting. A positive number results in a straight cut on the bottom
             of the part passed, a negagive number results in a straight cut on the top of the part passed
     """
+    if start == end:
+        raise ValueError("start and end points cannot be the same")
     if abs(vertical_offset) > part.bounding_box().size.Z:
         raise ValueError(
             "Vertical offset cannot be greater than the part's height"
@@ -776,7 +775,7 @@ def dovetail_subpart(
                             taper_distance=0,
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
-                            scarf_offset=-scarf_offset + vertical_scarf_offset,
+                            scarf_offset=-scarf_offset + vertical_scarf_offset * (2 if section == DovetailPart.TAIL else .5),
                             straighten_dovetail=True,
                         )
                     )
@@ -805,7 +804,7 @@ def dovetail_subpart(
                             ),
                             length_ratio=length_ratio,
                             depth_ratio=depth_ratio,
-                            scarf_offset=-scarf_offset + vertical_scarf_offset,
+                            scarf_offset=-scarf_offset + vertical_scarf_offset * (2 if section == DovetailPart.TAIL else .5),
                             straighten_dovetail=False,
                         )
                     )
@@ -1027,6 +1026,8 @@ def dovetail_split_line(
 
 
 if __name__ == "__main__":
+    from ocp_vscode import show, Camera
+
     with BuildPart(mode=Mode.PRIVATE) as test:
         Box(40, 80, 78.7, align=(Align.CENTER, Align.CENTER, Align.MIN))
         with BuildPart(
@@ -1064,7 +1065,7 @@ if __name__ == "__main__":
                     vertical_offset=-14.33333,
                     click_fit_radius=.75
     )
-    sckt.color = (0.5, 0.5, 0.5)
+    sckt.color = (0.5, 0.5, .5)
     splines = snugtail_subpart_outline(
         test.part,
         Point(-25, 0),
@@ -1100,5 +1101,5 @@ if __name__ == "__main__":
         # splines,
         reset_camera=Camera.KEEP,
     )
-    export_stl(tl, "tail.stl")
-    export_stl(sckt, "socket.stl")
+    # export_stl(tl, "tail.stl")
+    # export_stl(sckt, "socket.stl")

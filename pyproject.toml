@@ -1,6 +1,6 @@
 [project]
 name = "fb-library"
-version = "0.0.18"
+version = "0.0.19"
 authors = [
   { name="x0pherl"},
 ]
@@ -22,3 +22,8 @@ Documentation = "https://fb-library.readthedocs.org"
 requires = ["hatchling", "hatch-vcs"]
 
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+markers = [
+    "manual: marks tests that can only be executed manually",
+]
