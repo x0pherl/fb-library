@@ -110,11 +110,11 @@ def snugtail_subpart_outline(
     tail_length = start.distance_to(end) * length_ratio
 
     cut_start = toleranced_start_point.related_point(
-        base_angle - 90, tail_length * 1.5
+        base_angle - 90, tail_length * 1.5 + dovetail_tolerance/2
     )
 
     cut_end = toleranced_end_point.related_point(
-        base_angle - 90, tail_length * 1.5
+        base_angle - 90, tail_length * 1.5 + dovetail_tolerance/2
     )
 
     fin_join = cut_start.related_point(
@@ -130,10 +130,10 @@ def snugtail_subpart_outline(
 
     start_fin = cut_start.related_point(
         base_angle, tail_depth - (tolerance / 2 * direction_multiplier)
-    )
+    ).related_point(base_angle + 90, dovetail_tolerance/2)
     end_fin = cut_end.related_point(
         base_angle - 180, tail_depth - (tolerance / 2 * direction_multiplier)
-    )
+    ).related_point(base_angle + 90, dovetail_tolerance/2)
 
     start_snugtail = start_fin.related_point(base_angle + 90, tail_length * 2)
     end_snugtail = end_fin.related_point(base_angle + 90, tail_length * 2)
@@ -1041,39 +1041,40 @@ if __name__ == "__main__":
                     rotation=(90, 0, 0),
                 )
 
-    tl = dovetail_subpart(
-        test.part,
-        Point(-20, 0),
-        Point(20, 0),
-        section=DovetailPart.TAIL,
-                    tolerance=.075,
-                    vertical_tolerance=0.2,
-                    taper_angle=2,
-                    scarf_angle=20,
-                    vertical_offset=-14.33333,
-                    click_fit_radius=.75
-    ).move(Location((0, 0, 0)))
-    sckt = dovetail_subpart(
-        test.part,
-        Point(-20, 0),
-        Point(20, 0),
-        section=DovetailPart.SOCKET,
-                    tolerance=.075,
-                    vertical_tolerance=0.2,
-                    taper_angle=2,
-                    scarf_angle=20,
-                    vertical_offset=-14.33333,
-                    click_fit_radius=.75
-    )
-    sckt.color = (0.5, 0.5, .5)
+    # tl = dovetail_subpart(
+    #     test.part,
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.TAIL,
+    #                 tolerance=.075,
+    #                 vertical_tolerance=0.2,
+    #                 taper_angle=2,
+    #                 scarf_angle=20,
+    #                 vertical_offset=-14.33333,
+    #                 click_fit_radius=.75
+    # ).move(Location((0, 0, 0)))
+    # sckt = dovetail_subpart(
+    #     test.part,
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.SOCKET,
+    #                 tolerance=.075,
+    #                 vertical_tolerance=0.2,
+    #                 taper_angle=2,
+    #                 scarf_angle=20,
+    #                 vertical_offset=-14.33333,
+    #                 click_fit_radius=.75
+    # )
+    # sckt.color = (0.5, 0.5, .5)
     splines = snugtail_subpart_outline(
         test.part,
         Point(-25, 0),
         Point(25, 0),
         section=DovetailPart.SOCKET,
         taper_distance=0,
+        tolerance=0.8,
         # scarf_angle=20,
-        straighten_dovetail=True,
+        # straighten_dovetail=True,
     )
     spline = snugtail_subpart_outline(
         test.part,
@@ -1081,9 +1082,11 @@ if __name__ == "__main__":
         Point(25, 0),
         section=DovetailPart.TAIL,
         taper_distance=0,
+        tolerance=0.8,
         # scarf_angle=20,
-        straighten_dovetail=True,
+        # straighten_dovetail=True,
     )
+    splines.color = (0.5, 0.5, 0.5)
     with BuildSketch() as sks:
         add(splines)
         make_face()
@@ -1093,12 +1096,12 @@ if __name__ == "__main__":
     from build123d import export_stl
 
     show(
-        tl,
-        sckt,
+        # tl,
+        # sckt,
         # sk,
         # sks,
-        # spline,
-        # splines,
+        spline,
+        splines,
         reset_camera=Camera.KEEP,
     )
     # export_stl(tl, "tail.stl")
