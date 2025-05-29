@@ -1041,31 +1041,31 @@ if __name__ == "__main__":
                     rotation=(90, 0, 0),
                 )
 
-    # tl = dovetail_subpart(
-    #     test.part,
-    #     Point(-20, 0),
-    #     Point(20, 0),
-    #     section=DovetailPart.TAIL,
-    #                 tolerance=.075,
-    #                 vertical_tolerance=0.2,
-    #                 taper_angle=2,
-    #                 scarf_angle=20,
-    #                 vertical_offset=-14.33333,
-    #                 click_fit_radius=.75
-    # ).move(Location((0, 0, 0)))
-    # sckt = dovetail_subpart(
-    #     test.part,
-    #     Point(-20, 0),
-    #     Point(20, 0),
-    #     section=DovetailPart.SOCKET,
-    #                 tolerance=.075,
-    #                 vertical_tolerance=0.2,
-    #                 taper_angle=2,
-    #                 scarf_angle=20,
-    #                 vertical_offset=-14.33333,
-    #                 click_fit_radius=.75
-    # )
-    # sckt.color = (0.5, 0.5, .5)
+    tl = dovetail_subpart(
+        test.part,
+        Point(-20, 0),
+        Point(20, 0),
+        section=DovetailPart.TAIL,
+                    tolerance=.075,
+                    vertical_tolerance=0.2,
+                    taper_angle=2,
+                    scarf_angle=20,
+                    vertical_offset=-14.33333,
+                    click_fit_radius=.75
+    ).move(Location((0, 0, 0)))
+    sckt = dovetail_subpart(
+        test.part,
+        Point(-20, 0),
+        Point(20, 0),
+        section=DovetailPart.SOCKET,
+                    tolerance=.075,
+                    vertical_tolerance=0.2,
+                    taper_angle=2,
+                    scarf_angle=20,
+                    vertical_offset=-14.33333,
+                    click_fit_radius=.75
+    )
+    sckt.color = (0.5, 0.5, .5)
     splines = snugtail_subpart_outline(
         test.part,
         Point(-25, 0),
@@ -1096,12 +1096,12 @@ if __name__ == "__main__":
     from build123d import export_stl
 
     show(
-        # tl,
-        # sckt,
+        tl,
+        sckt,
         # sk,
         # sks,
-        spline,
-        splines,
+        # spline,
+        # splines,
         reset_camera=Camera.KEEP,
     )
     # export_stl(tl, "tail.stl")
