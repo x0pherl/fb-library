@@ -61,6 +61,8 @@ def snugtail_subpart_outline(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     tolerance=0.025,
+    length_ratio=.8,
+    depth_ratio=.15,
     taper_distance=0,
     scarf_offset=0,
     straighten_dovetail=False,
@@ -82,11 +84,10 @@ def snugtail_subpart_outline(
             allowing for the correct tolerances for the section
     """
     tail_angle_offset = 25
-    length_ratio = 1 / 5
-    depth_ratio = length_ratio / 2
 
     direction_multiplier = 1 if section == DovetailPart.TAIL else -1
     base_angle = start.angle_to(end)
+    opposite_angle = 180 if base_angle == 0 else -base_angle
     dovetail_tolerance = -(abs(tolerance / 2)) * direction_multiplier
     adjusted_start_point = start.related_point(base_angle - 90, scarf_offset)
     adjusted_end_point = end.related_point(base_angle - 90, scarf_offset)
@@ -106,48 +107,48 @@ def snugtail_subpart_outline(
         * 3
     )
 
-    tail_depth = start.distance_to(end) * depth_ratio
-    tail_length = start.distance_to(end) * length_ratio
+    cut_length = start.distance_to(end)
+    tail_depth = cut_length * depth_ratio
+    tail_length = cut_length * length_ratio
 
     cut_start = toleranced_start_point.related_point(
-        base_angle - 90, tail_length * 1.5 + dovetail_tolerance/2
+        base_angle - 90, tail_length/2 + dovetail_tolerance/2
     )
 
     cut_end = toleranced_end_point.related_point(
-        base_angle - 90, tail_length * 1.5 + dovetail_tolerance/2
+        base_angle - 90, tail_length/2 + dovetail_tolerance/2
     )
 
     fin_join = cut_start.related_point(
-        base_angle, tail_depth - (tolerance / 2 * direction_multiplier)
+        base_angle, tail_depth + dovetail_tolerance
     ).related_point(
-        base_angle - 90, tail_depth - (tolerance / 2 * direction_multiplier)
+        base_angle - 90, tail_depth + dovetail_tolerance
     )
     fin_depart = cut_end.related_point(
-        base_angle - 180, tail_depth - (tolerance / 2 * direction_multiplier)
+        base_angle - 180, tail_depth + dovetail_tolerance
     ).related_point(
-        base_angle - 90, tail_depth - (tolerance / 2 * direction_multiplier)
+        base_angle - 90, tail_depth + dovetail_tolerance
     )
 
     start_fin = cut_start.related_point(
-        base_angle, tail_depth - (tolerance / 2 * direction_multiplier)
-    ).related_point(base_angle + 90, dovetail_tolerance/2)
+        base_angle, tail_depth + dovetail_tolerance
+    ).related_point(base_angle + 90, dovetail_tolerance*1.5)
     end_fin = cut_end.related_point(
-        base_angle - 180, tail_depth - (tolerance / 2 * direction_multiplier)
-    ).related_point(base_angle + 90, dovetail_tolerance/2)
+        base_angle - 180, tail_depth + dovetail_tolerance
+    ).related_point(base_angle + 90, dovetail_tolerance*1.5)
 
-    start_snugtail = start_fin.related_point(base_angle + 90, tail_length * 2)
-    end_snugtail = end_fin.related_point(base_angle + 90, tail_length * 2)
+    start_snugtail = start_fin.related_point(base_angle + 90, cut_length*(1-depth_ratio*2))
+    end_snugtail = end_fin.related_point(base_angle + 90, cut_length*(1-depth_ratio*2))
 
-    fin_connect = toleranced_start_point.related_point(
-        base_angle, tail_depth - (tolerance / 2 * direction_multiplier)
-    ).related_point(base_angle + 90, tail_length * 1.5)
-    fin_disconnect = toleranced_end_point.related_point(
-        base_angle - 180, tail_depth - (tolerance / 2 * direction_multiplier)
-    ).related_point(base_angle + 90, tail_length * 1.5)
+    fin_connect = start_fin.related_point(base_angle + 90, cut_length*(1-depth_ratio)-dovetail_tolerance)
+    
+    fin_disconnect = end_fin.related_point(base_angle + 90, cut_length*(1-depth_ratio)-dovetail_tolerance)
 
-    start_tail_line = fin_connect.related_point(base_angle, tail_length)
-
-    end_tail_line = fin_disconnect.related_point(base_angle - 180, tail_length)
+    start_tail_line = fin_connect.related_point(base_angle, abs(dovetail_tolerance)
+            * (4 if section == DovetailPart.TAIL else 6) - dovetail_tolerance*2)
+    
+    end_tail_line = fin_disconnect.related_point(opposite_angle, abs(dovetail_tolerance)
+            * (4 if section == DovetailPart.TAIL else 6) - dovetail_tolerance*2)
 
     with BuildLine() as tail_line:
         Polyline(
@@ -174,18 +175,17 @@ def snugtail_subpart_outline(
             add(
                 dovetail_split_line(
                     start=start_fin.related_point(
-                        base_angle, tolerance / 2 * direction_multiplier
+                        base_angle, -dovetail_tolerance
                     ),
                     end=start_snugtail.related_point(
-                        base_angle, tolerance / 2 * direction_multiplier
+                        base_angle, -dovetail_tolerance
                     ),
                     section=section,
-                    linear_offset=tolerance / 2 * -direction_multiplier,
                     tolerance=tolerance,
                     tail_angle_offset=tail_angle_offset,
                     taper_distance=taper_distance,
-                    length_ratio=1 / 2,
-                    depth_ratio=1 / 4,
+                    length_ratio=length_ratio,
+                    depth_ratio=depth_ratio,
                 )
             )
         FilletPolyline(
@@ -204,18 +204,18 @@ def snugtail_subpart_outline(
             add(
                 dovetail_split_line(
                     start=start_tail_line.related_point(
-                        base_angle - 90, tolerance / 2 * direction_multiplier
+                        base_angle - 90, -dovetail_tolerance
                     ),
                     end=end_tail_line.related_point(
-                        base_angle - 90, tolerance / 2 * direction_multiplier
+                        base_angle - 90, -dovetail_tolerance
                     ),
                     section=section,
                     linear_offset=0,
                     tolerance=tolerance,
                     tail_angle_offset=tail_angle_offset,
                     taper_distance=taper_distance,
-                    length_ratio=1 / 2 * 0.75,
-                    depth_ratio=1 / 4 * 0.75,
+                    length_ratio=length_ratio,
+                    depth_ratio=depth_ratio,
                 )
             )
         FilletPolyline(
@@ -231,18 +231,18 @@ def snugtail_subpart_outline(
             add(
                 dovetail_split_line(
                     start=end_snugtail.related_point(
-                        base_angle, -tolerance / 2 * direction_multiplier
+                        base_angle, dovetail_tolerance
                     ),
                     end=end_fin.related_point(
-                        base_angle, -tolerance / 2 * direction_multiplier
+                        base_angle, dovetail_tolerance
                     ),
                     section=section,
-                    linear_offset=tolerance / 2 * direction_multiplier,
+                    linear_offset=0,
                     tolerance=tolerance,
                     tail_angle_offset=tail_angle_offset,
                     taper_distance=taper_distance,
-                    length_ratio=1 / 2,
-                    depth_ratio=1 / 4,
+                    length_ratio=length_ratio,
+                    depth_ratio=depth_ratio,
                 )
             )
         FilletPolyline(
@@ -942,94 +942,59 @@ def dovetail_split_line(
     )
 
     base_angle = start.angle_to(end)
+    tail_angle_tolerance_adjustment = (dovetail_tolerance * tan(radians(tail_angle_offset)))
+    base_angle = start.angle_to(end)
     length = start.distance_to(end)
-    tongue_length = length * length_ratio
+    tongue_length = length * length_ratio + (dovetail_tolerance*2) 
     tongue_depth = length * depth_ratio
+    tail_angle_extension = (tongue_depth - taper_distance) * tan(
+        radians(tail_angle_offset)
+    )
     adjusted_start_point = start.related_point(
         base_angle - 90, dovetail_tolerance
     )
+
+    tail_end_start = adjusted_start_point.related_point(
+        base_angle,
+        length/2 - tongue_length/2-tail_angle_tolerance_adjustment+linear_offset,
+    ).related_point(base_angle-90, tongue_depth)
+
+    tail_end = adjusted_start_point.related_point(
+        base_angle,
+        length/2 + tongue_length/2+tail_angle_tolerance_adjustment+linear_offset,
+    ).related_point(base_angle-90, tongue_depth)
+
+
     tail_base_start = adjusted_start_point.related_point(
         base_angle,
-        length / 2
-        - tongue_length / 2
-        - dovetail_tolerance * 1.5
-        + taper_distance
-        + linear_offset,
+        length/2 - tongue_length/2 + tail_angle_extension - 
+        tail_angle_tolerance_adjustment + linear_offset,
     )
 
     tail_base_resume = adjusted_start_point.related_point(
         base_angle,
-        length / 2
-        + tongue_length / 2
-        + dovetail_tolerance * 1.5
-        - taper_distance
-        + linear_offset,
+        length/2 + tongue_length/2-tail_angle_extension+tail_angle_tolerance_adjustment+linear_offset,
     )
-    tail_angle_extension = (tongue_depth - taper_distance) * tan(
-        radians(tail_angle_offset)
-    )
-    tail_end_start = tail_base_start.related_point(
-        base_angle - 90,
-        tongue_depth - taper_distance,
-    ).related_point(base_angle, -tail_angle_extension)
 
-    tail_end = tail_base_resume.related_point(
-        base_angle - 90,
-        tongue_depth - taper_distance,
-    ).related_point(base_angle, tail_angle_extension)
     adjusted_end_point = adjusted_start_point.related_point(base_angle, length)
 
     with BuildLine() as dovetail_outline:
-        Polyline(*[
-            adjusted_start_point,
-            tail_base_start,
-            tail_end_start,
-            tail_end,
-            tail_base_resume,
-            adjusted_end_point,]
-        )
-        fillet(
-            dovetail_outline.vertices()
-            .filter_by_position(
-                Axis.X, tail_base_start.x, tail_base_start.x, (True, True)
-            )
-            .filter_by_position(
-                Axis.Y, tail_base_start.y, tail_base_start.y, (True, True)
-            )
-            + dovetail_outline.vertices()
-            .filter_by_position(
-                Axis.X, tail_base_resume.x, tail_base_resume.x, (True, True)
-            )
-            .filter_by_position(
-                Axis.Y, tail_base_resume.y, tail_base_resume.y, (True, True)
-            ),
-            abs(
-                dovetail_tolerance * (2 if section == DovetailPart.TAIL else 3)
-            ),
-        )
-        fillet(
-            dovetail_outline.vertices()
-            .filter_by_position(
-                Axis.X, tail_end_start.x, tail_end_start.x, (True, True)
-            )
-            .filter_by_position(
-                Axis.Y, tail_end_start.y, tail_end_start.y, (True, True)
-            )
-            + dovetail_outline.vertices()
-            .filter_by_position(Axis.X, tail_end.x, tail_end.x, (True, True))
-            .filter_by_position(Axis.Y, tail_end.y, tail_end.y, (True, True)),
-            abs(
-                dovetail_tolerance * (3 if section == DovetailPart.TAIL else 2)
-            ),
-        )
-    return dovetail_outline.line
+        FilletPolyline(adjusted_start_point, tail_base_start, midpoint(tail_base_start, tail_end_start),
+                radius=abs(dovetail_tolerance) * (2 if section == DovetailPart.TAIL else 3))
+        FilletPolyline(midpoint(tail_base_start, tail_end_start), tail_end_start, midpoint(tail_end_start, tail_end),
+                radius=abs(dovetail_tolerance) * (3 if section == DovetailPart.TAIL else 2))
+        FilletPolyline(midpoint(tail_end_start, tail_end), tail_end, midpoint(tail_end, tail_base_resume),
+                radius=abs(dovetail_tolerance) * (3 if section == DovetailPart.TAIL else 2))
+        FilletPolyline(midpoint(tail_end, tail_base_resume), tail_base_resume, adjusted_end_point,
+                radius=abs(dovetail_tolerance) * (2 if section == DovetailPart.TAIL else 3))
 
+    return dovetail_outline.line
 
 if __name__ == "__main__":
     from ocp_vscode import show, Camera
 
     with BuildPart(mode=Mode.PRIVATE) as test:
-        Box(40, 80, 78.7, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        Box(40, 200, 78.7, align=(Align.CENTER, Align.CENTER, Align.MIN))
         with BuildPart(
                 Plane.XY.offset(73.6
                 ),
@@ -1037,7 +1002,7 @@ if __name__ == "__main__":
             ):
                 Cylinder(
                     25,
-                    170,
+                    200,
                     rotation=(90, 0, 0),
                 )
 
@@ -1046,10 +1011,11 @@ if __name__ == "__main__":
         Point(-20, 0),
         Point(20, 0),
         section=DovetailPart.TAIL,
-                    tolerance=.075,
+                    tolerance=.8,
                     vertical_tolerance=0.2,
                     taper_angle=2,
                     scarf_angle=20,
+                    
                     vertical_offset=-14.33333,
                     click_fit_radius=.75
     ).move(Location((0, 0, 0)))
@@ -1058,7 +1024,7 @@ if __name__ == "__main__":
         Point(-20, 0),
         Point(20, 0),
         section=DovetailPart.SOCKET,
-                    tolerance=.075,
+                    tolerance=.8,
                     vertical_tolerance=0.2,
                     taper_angle=2,
                     scarf_angle=20,
@@ -1068,8 +1034,8 @@ if __name__ == "__main__":
     sckt.color = (0.5, 0.5, .5)
     splines = snugtail_subpart_outline(
         test.part,
-        Point(-25, 0),
-        Point(25, 0),
+        Point(-20, 0),
+        Point(20, 0),
         section=DovetailPart.SOCKET,
         taper_distance=0,
         tolerance=0.8,
@@ -1078,8 +1044,8 @@ if __name__ == "__main__":
     )
     spline = snugtail_subpart_outline(
         test.part,
-        Point(-25, 0),
-        Point(25, 0),
+        Point(-20, 0),
+        Point(20, 0),
         section=DovetailPart.TAIL,
         taper_distance=0,
         tolerance=0.8,
@@ -1090,6 +1056,7 @@ if __name__ == "__main__":
     with BuildSketch() as sks:
         add(splines)
         make_face()
+    sks.color = (0.5, 0.5, 0.5)
     with BuildSketch() as sk:
         add(spline)
         make_face()
@@ -1098,10 +1065,10 @@ if __name__ == "__main__":
     show(
         tl,
         sckt,
-        # sk,
-        # sks,
-        # spline,
-        # splines,
+        sk,
+        sks,
+        spline,
+        splines,
         reset_camera=Camera.KEEP,
     )
     # export_stl(tl, "tail.stl")
