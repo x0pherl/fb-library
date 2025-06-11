@@ -204,7 +204,15 @@ def test_visualize_positive_voffset_dovetail():
     bottom = dovetail_subpart(hanger.part, Point(-10,17), Point(10,17), section=DovetailPart.SOCKET, 
                         taper_angle=taper,
                     scarf_angle=scarf,vertical_offset=voffset).move(Location((0, -15, 0)))
-    show(top, bottom, reset_camera=Camera.KEEP)
+    with (
+        patch("build123d.export_stl"),
+        patch("pathlib.Path.mkdir"),
+        patch("pathlib.Path.exists"),
+        patch("pathlib.Path.is_dir"),
+        patch("ocp_vscode.show"),
+        patch("ocp_vscode.save_screenshot"),
+        ):
+            show(top, bottom, reset_camera=Camera.KEEP)
 
 @pytest.mark.manual
 def test_visualize_negative_voffset_dovetail():
@@ -274,15 +282,23 @@ def test_visualize_negative_voffset_dovetail():
         make_face()
     from build123d import export_stl
 
-    show(
-        tl,
-        sckt,
-        # sk,
-        # sks,
-        # spline,
-        # splines,
-        reset_camera=Camera.KEEP,
-    )
+    with (
+        patch("build123d.export_stl"),
+        patch("pathlib.Path.mkdir"),
+        patch("pathlib.Path.exists"),
+        patch("pathlib.Path.is_dir"),
+        patch("ocp_vscode.show"),
+        patch("ocp_vscode.save_screenshot"),
+    ):
+        show(
+            tl,
+            sckt,
+            # sk,
+            # sks,
+            # spline,
+            # splines,
+            reset_camera=Camera.KEEP,
+        )
 
 if __name__ == "__main__":
     test_visualize_positive_voffset_dovetail()

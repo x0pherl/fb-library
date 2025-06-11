@@ -402,6 +402,8 @@ def subpart_outline(
             section=section,
             tolerance=tolerance,
             taper_distance=taper_distance,
+            length_ratio=length_ratio,
+            depth_ratio=depth_ratio,
             scarf_offset=scarf_offset,
             straighten_dovetail=straighten_dovetail,
         )
@@ -1013,10 +1015,11 @@ if __name__ == "__main__":
         section=DovetailPart.TAIL,
                     tolerance=.8,
                     vertical_tolerance=0.2,
-                    taper_angle=2,
+                    taper_angle=4,
                     scarf_angle=20,
                     
                     vertical_offset=-14.33333,
+                    length_ratio=.7,
                     click_fit_radius=.75
     ).move(Location((0, 0, 0)))
     sckt = dovetail_subpart(
@@ -1026,9 +1029,10 @@ if __name__ == "__main__":
         section=DovetailPart.SOCKET,
                     tolerance=.8,
                     vertical_tolerance=0.2,
-                    taper_angle=2,
+                    taper_angle=4,
                     scarf_angle=20,
                     vertical_offset=-14.33333,
+                    length_ratio=.7,
                     click_fit_radius=.75
     )
     sckt.color = (0.5, 0.5, .5)
@@ -1065,8 +1069,8 @@ if __name__ == "__main__":
     show(
         tl,
         sckt,
-        sk,
-        sks,
+        # sk,
+        # sks,
         spline,
         splines,
         reset_camera=Camera.KEEP,
