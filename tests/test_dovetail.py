@@ -158,6 +158,20 @@ class TestDovetail:
             )
         assert socket.part.is_valid()
 
+    def test_snugtail_ratios_exceed_max(self):
+        with BuildPart(mode=Mode.PRIVATE) as test:
+            Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        with pytest.raises(ValueError):
+            snugtail_subpart_outline(
+                test.part,
+                Point(-5, 0),
+                Point(5, 0),
+                section=DovetailPart.SOCKET,
+                taper_distance=0,
+                length_ratio=.9,
+                depth_ratio=.11
+        )
+
     def test_valid_vert_tail(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
             Box(10, 50, 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
