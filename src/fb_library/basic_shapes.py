@@ -250,7 +250,7 @@ def teardrop_sketch(
             The distance from the center of the teardrop circle to the peak of the
             teardrop shape.
         - align: tuple
-            The alignment of the teardrop.
+            The alignment of the teardrop. Note that the Y alignment is to the center of the cylinder, ignoring the peak distance
     """
     from math import sqrt
 
@@ -265,14 +265,14 @@ def teardrop_sketch(
         make_face()
     movex = 0
     if align[0] == Align.MAX:
-        movex = -radius
+        movex -= radius
     elif align[0] == Align.MIN:
-        movex = radius
-    movey = -(peak_distance - radius) / 2
+        movex += radius
+    movey = 0
     if align[1] == Align.MAX:
-        movey -= peak_distance
+        movey -= radius
     elif align[1] == Align.MIN:
-        movey += peak_distance
+        movey += radius
 
     return teardrop.sketch.move(Location((movex, movey)))
 
@@ -331,4 +331,4 @@ if __name__ == "__main__":
             10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MIN)
         ),
         reset_camera=Camera.KEEP,
-    )
+        )
