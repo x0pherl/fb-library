@@ -54,19 +54,18 @@ class DovetailStyle(Enum):
     TRADITIONAL = auto()
     SNUGTAIL = auto()
 
-
 def snugtail_subpart_outline(
     part: Part,
     start: Point,
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
-    tolerance=0.025,
-    tail_angle_offset=15,
-    taper_distance=0,
-    length_ratio=.8,
-    depth_ratio=.15,
-    scarf_offset=0,
-    straighten_dovetail=False,
+    tolerance:float=0.025,
+    tail_angle_offset:float=15,
+    taper_distance:float=0,
+    length_ratio:float=.8,
+    depth_ratio:float=.15,
+    scarf_offset:float=0,
+    straighten_dovetail:bool=False,
 ) -> Line:
     """
     given a part and a start and end point on the XY plane, returns an outline to build an intersection Part to generate the subpart
@@ -261,14 +260,14 @@ def dovetail_subpart_outline(
     start: Point,
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
-    linear_offset=0,
-    tolerance=0.025,
-    tail_angle_offset=15,
-    taper_distance=0,
-    length_ratio=1 / 3,
-    depth_ratio=1 / 6,
-    scarf_offset=0,
-    straighten_dovetail=False,
+    linear_offset:float=0,
+    tolerance:float=0.025,
+    tail_angle_offset:float=15,
+    taper_distance:float=0,
+    length_ratio:float=1 / 3,
+    depth_ratio:float=1 / 6,
+    scarf_offset:float=0,
+    straighten_dovetail:bool=False,
 ) -> Line:
     """
     given a part and a start and end point on the XY plane, returns an outline to build an intersection Part to generate the subpart
@@ -356,14 +355,14 @@ def subpart_outline(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     style: DovetailStyle = DovetailStyle.SNUGTAIL,
-    linear_offset=0,
-    tolerance=0.025,
-    tail_angle_offset=15,
-    taper_distance=0,
-    length_ratio=1 / 3,
-    depth_ratio=1 / 6,
-    scarf_offset=0,
-    straighten_dovetail=False,
+    linear_offset:float=0,
+    tolerance:float=0.025,
+    tail_angle_offset:float=15,
+    taper_distance:float=0,
+    length_ratio:float=1 / 3,
+    depth_ratio:float=1 / 6,
+    scarf_offset:float=0,
+    straighten_dovetail:bool=False,
 ) -> Line:
     """
     given a part and a start and end point on the XY plane, returns an outline to build an intersection Part to generate the subpart
@@ -417,14 +416,14 @@ def traditional_subpart_divots(
     start: Point,
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
-    linear_offset=0,
-    tolerance=0.025,
-    vertical_tolerance=0.2,
-    scarf_angle=0,
-    taper_angle=0,
-    depth_ratio=1 / 6,
-    vertical_offset=0,
-    click_fit_radius=0,
+    linear_offset:float=0,
+    tolerance:float=0.025,
+    vertical_tolerance:float=0.2,
+    scarf_angle:float=0,
+    taper_angle:float=0,
+    depth_ratio:float=1 / 6,
+    vertical_offset:float=0,
+    click_fit_radius:float=0,
 ):
     """
     adds/subtracts click-fit divots to subpart and returns it
@@ -568,8 +567,8 @@ def snugtail_divots(
     section: DovetailPart = DovetailPart.TAIL,
     tolerance: float = 0.025,
     scarf_angle: float = 0,
-    depth_ratio=1 / 10,
-    length_ratio=1 / 5,
+    depth_ratio:float = 1 / 10,
+    length_ratio:float = 1 / 5,
     vertical_offset: float = 0,
     click_fit_radius: float = 0,
 ) -> Part:
@@ -611,15 +610,15 @@ def subpart_divots(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     style: DovetailStyle = DovetailStyle.SNUGTAIL,
-    linear_offset=0,
-    tolerance=0.025,
-    vertical_tolerance=0.2,
-    scarf_angle=0,
-    taper_angle=0,
-    depth_ratio=1 / 6,
-    length_ratio=1 / 3,
-    vertical_offset=0,
-    click_fit_radius=0,
+    linear_offset:float=0,
+    tolerance:float=0.025,
+    vertical_tolerance:float=0.2,
+    scarf_angle:float=0,
+    taper_angle:float=0,
+    depth_ratio:float=1 / 6,
+    length_ratio:float=1 / 3,
+    vertical_offset:float=0,
+    click_fit_radius:float=0,
 ):
     """
     adds/subtracts click-fit divots to subpart and returns it
@@ -675,16 +674,16 @@ def dovetail_subpart(
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
     style: DovetailStyle = DovetailStyle.SNUGTAIL,
-    linear_offset=0,
-    tolerance=0.025,
-    vertical_tolerance=0.2,
-    tail_angle_offset=15,
-    taper_angle=0,
-    length_ratio=1 / 3,
-    depth_ratio=1 / 6,
-    scarf_angle=0,
-    vertical_offset=0,
-    click_fit_radius=0,
+    linear_offset:float=0,
+    tolerance:float=0.025,
+    vertical_tolerance:float=0.2,
+    tail_angle_offset:float=15,
+    taper_angle:float=0,
+    length_ratio:float=1 / 3,
+    depth_ratio:float=1 / 6,
+    scarf_angle:float=0,
+    vertical_offset:float=0,
+    click_fit_radius:float=0,
 ) -> Part:
     """
     given a part and a start and end point on the XY plane, returns a Part for the appropriate split section
@@ -919,12 +918,12 @@ def dovetail_split_line(
     start: Point,
     end: Point,
     section: DovetailPart = DovetailPart.TAIL,
-    linear_offset=0,
-    tolerance=0.025,
-    tail_angle_offset=15,
-    taper_distance=0,
-    length_ratio=1 / 3,
-    depth_ratio=1 / 6,
+    linear_offset:float=0,
+    tolerance:float=0.025,
+    tail_angle_offset:float=15,
+    taper_distance:float=0,
+    length_ratio:float=1 / 3,
+    depth_ratio:float=1 / 6,
 ) -> Line:
     """
     given a start and end point, returns a dovetail split outline as a Line object
