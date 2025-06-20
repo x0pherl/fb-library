@@ -54,6 +54,54 @@ class DovetailStyle(Enum):
     TRADITIONAL = auto()
     SNUGTAIL = auto()
 
+
+def subpart_outline_boundary(
+        start: Point,
+        end: Point,
+        max_dimension: float,
+        section: DovetailPart = DovetailPart.TAIL,
+        tolerance: float = 0.1,
+        scarf_offset: float = 0,
+
+) -> Line:
+    direction_multiplier = 1 if section == DovetailPart.TAIL else -1
+    base_angle = start.angle_to(end)
+    dovetail_tolerance = -(abs(tolerance / 2)) * direction_multiplier
+    adjusted_start_point = start.related_point(base_angle - 90, scarf_offset)
+    adjusted_end_point = end.related_point(base_angle - 90, scarf_offset)
+    toleranced_start_point = adjusted_start_point.related_point(
+        base_angle - 90, dovetail_tolerance
+    )
+    toleranced_end_point = adjusted_end_point.related_point(
+        base_angle - 90, dovetail_tolerance
+    )
+
+    with BuildLine() as border:
+        Polyline(*[
+            tuple(toleranced_start_point),
+            tuple(
+                toleranced_start_point.related_point(
+                    base_angle + 180, max_dimension
+                )
+            ),
+            tuple(
+                toleranced_start_point.related_point(
+                    base_angle - 225 * direction_multiplier, max_dimension
+                )
+            ),
+            tuple(
+                toleranced_end_point.related_point(
+                    base_angle + 45 * direction_multiplier, max_dimension
+                )
+            ),
+            tuple(
+                toleranced_end_point.related_point(base_angle, max_dimension)
+            ),
+            tuple(toleranced_end_point)]
+        )
+
+    return border.line
+
 def snugtail_subpart_outline(
     part: Part,
     start: Point,
@@ -112,13 +160,17 @@ def snugtail_subpart_outline(
     tail_depth = cut_length * depth_ratio
     tail_length = cut_length * length_ratio
 
-    cut_start = toleranced_start_point.related_point(
-        base_angle - 90, tail_length/2 + tail_depth + dovetail_tolerance/2
-    )
+    # cut_start = toleranced_start_point.related_point(
+    #     base_angle - 90, tail_length/2 + tail_depth + dovetail_tolerance/2
+    # )
 
-    cut_end = toleranced_end_point.related_point(
-        base_angle - 90, tail_length/2 + tail_depth + dovetail_tolerance/2
-    )
+    # cut_end = toleranced_end_point.related_point(
+    #     base_angle - 90, tail_length/2 + tail_depth + dovetail_tolerance/2
+    # )
+
+    cut_start = toleranced_start_point
+
+    cut_end = toleranced_end_point
 
     fin_join = cut_start.related_point(
         base_angle, tail_depth/2 + dovetail_tolerance
@@ -133,10 +185,10 @@ def snugtail_subpart_outline(
 
     start_fin = cut_start.related_point(
         base_angle, tail_depth/2 + dovetail_tolerance
-    ).related_point(base_angle + 90, dovetail_tolerance*1.5)
+    ).related_point(base_angle + 90, dovetail_tolerance)
     end_fin = cut_end.related_point(
         base_angle - 180, tail_depth/2 + dovetail_tolerance
-    ).related_point(base_angle + 90, dovetail_tolerance*1.5)
+    ).related_point(base_angle + 90, dovetail_tolerance)
 
     start_snugtail = start_fin.related_point(base_angle + 90, cut_length-tail_depth/2)
     end_snugtail = end_fin.related_point(base_angle + 90, cut_length-tail_depth/2)
@@ -152,18 +204,14 @@ def snugtail_subpart_outline(
             * (4 if section == DovetailPart.TAIL else 6) - dovetail_tolerance*2)
 
     with BuildLine() as tail_line:
-        Polyline(
-            *[cut_start,
-            cut_start.related_point(base_angle + 180, max_dimension),
-            cut_start.related_point(
-                base_angle - 225 * direction_multiplier, max_dimension
-            ),
-            cut_end.related_point(
-                base_angle + 45 * direction_multiplier, max_dimension
-            ),
-            tuple(cut_end.related_point(base_angle, max_dimension)),
-            tuple(cut_end),
-        ])
+        add(subpart_outline_boundary(
+            start=start,
+            end=end,
+            max_dimension=max_dimension,
+            section=section,
+            tolerance=tolerance,
+            scarf_offset=scarf_offset,
+        ))
 
         FilletPolyline(
             *[cut_start, fin_join, start_fin],
@@ -308,28 +356,14 @@ def dovetail_subpart_outline(
     )
 
     with BuildLine() as tail_line:
-        Polyline(*[
-            tuple(toleranced_start_point),
-            tuple(
-                toleranced_start_point.related_point(
-                    base_angle + 180, max_dimension
-                )
-            ),
-            tuple(
-                toleranced_start_point.related_point(
-                    base_angle - 225 * direction_multiplier, max_dimension
-                )
-            ),
-            tuple(
-                toleranced_start_point.related_point(
-                    base_angle + 45 * direction_multiplier, max_dimension
-                )
-            ),
-            tuple(
-                toleranced_start_point.related_point(base_angle, max_dimension)
-            ),
-            tuple(toleranced_end_point)]
-        )
+        add(subpart_outline_boundary(
+            start=start,
+            end=end,
+            max_dimension=max_dimension,
+            section=section,
+            tolerance=tolerance,
+            scarf_offset=scarf_offset,
+        ))
         if straighten_dovetail:
             Line(toleranced_start_point, toleranced_end_point)
         else:
@@ -1044,38 +1078,38 @@ if __name__ == "__main__":
                     rotation=(90, 0, 0),
                 )
 
-    tl = dovetail_subpart(
-        test.part,
-        Point(-20, 0),
-        Point(20, 0),
-        section=DovetailPart.TAIL,
-                    tolerance=.1,
-                    vertical_tolerance=0.2,
-                    taper_angle=4,
-                    scarf_angle=20,
+    # tl = dovetail_subpart(
+    #     test.part,
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.TAIL,
+    #                 tolerance=.1,
+    #                 vertical_tolerance=0.2,
+    #                 taper_angle=4,
+    #                 scarf_angle=20,
                     
-                    vertical_offset=-14.33333,
-                    tail_angle_offset=25,
-                    length_ratio=.7,
-                    depth_ratio=.3,
-                    click_fit_radius=.75
-    ).move(Location((0, 0, 0)))
-    sckt = dovetail_subpart(
-        test.part,
-        Point(-20, 0),
-        Point(20, 0),
-        section=DovetailPart.SOCKET,
-                    tolerance=.1,
-                    vertical_tolerance=0.2,
-                    taper_angle=4,
-                    scarf_angle=20,
-                    vertical_offset=-14.33333,
-                    tail_angle_offset=25,
-                    length_ratio=.7,
-                    depth_ratio=.3,
-                    click_fit_radius=.75
-    )
-    sckt.color = (0.5, 0.5, .5)
+    #                 vertical_offset=-14.33333,
+    #                 tail_angle_offset=25,
+    #                 length_ratio=.7,
+    #                 depth_ratio=.3,
+    #                 click_fit_radius=.75
+    # ).move(Location((0, 0, 0)))
+    # sckt = dovetail_subpart(
+    #     test.part,
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.SOCKET,
+    #                 tolerance=.1,
+    #                 vertical_tolerance=0.2,
+    #                 taper_angle=4,
+    #                 scarf_angle=20,
+    #                 vertical_offset=-14.33333,
+    #                 tail_angle_offset=25,
+    #                 length_ratio=.7,
+    #                 depth_ratio=.3,
+    #                 click_fit_radius=.75
+    # )
+    # sckt.color = (0.5, 0.5, .5)
     splines = snugtail_subpart_outline(
         test.part,
         Point(-20, 0),
@@ -1102,6 +1136,32 @@ if __name__ == "__main__":
         # scarf_angle=20,
         # straighten_dovetail=True,
     )
+    # splines = dovetail_subpart_outline(
+    #     test.part,
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.SOCKET,
+    #     taper_distance=0,
+    #     tolerance=0.8,
+    #     length_ratio=.6,
+    #     depth_ratio=.3,
+    #     tail_angle_offset=35,
+    #     # scarf_angle=20,
+    #     # straighten_dovetail=True,
+    # )
+    # spline = dovetail_subpart_outline(
+    #     test.part,
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.TAIL,
+    #     taper_distance=0,
+    #     tolerance=0.8,
+    #     length_ratio=.6,
+    #     depth_ratio=.3,
+    #     tail_angle_offset=35,
+    #     # scarf_angle=20,
+    #     # straighten_dovetail=True,
+    # )
     splines.color = (0.5, 0.5, 0.5)
     with BuildSketch() as sks:
         add(splines)
@@ -1113,12 +1173,12 @@ if __name__ == "__main__":
     from build123d import export_stl
 
     show(
-        tl,
+        # tl,
         # sckt,
         # sk,
         # sks,
-        # spline,
-        # splines,
+        spline,
+        splines,
         reset_camera=Camera.KEEP,
     )
     # export_stl(tl, "tail.stl")
