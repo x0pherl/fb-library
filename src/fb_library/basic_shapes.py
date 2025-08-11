@@ -36,6 +36,21 @@ from build123d import (
 )
 from ocp_vscode import Camera, show
 
+def half_part(base_part: Part) -> Part:
+    """
+    for a given part, cut it in half along the X axis,
+    useful for a cross-section view when debugging a design
+    """
+    with BuildPart() as halfpart:
+        add(base_part)
+        Box(
+            9999,
+            9999,
+            9999,
+            align=(Align.MAX, Align.CENTER, Align.CENTER),
+            mode=Mode.SUBTRACT,
+        )
+    return halfpart.part
 
 def distance_to_circle_edge(radius, point, angle) -> float:
     """

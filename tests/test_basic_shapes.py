@@ -2,12 +2,13 @@ from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
 from unittest.mock import patch
 import pytest
-from build123d import Part, Align
+from build123d import Box, BuildPart, Part, Align
 from fb_library.basic_shapes import (
     circular_intersection,
     diamond_torus,
     distance_to_circle_edge,
     heatsink_cut,
+    half_part,
     rounded_cylinder,
     diamond_cylinder,
     # rail_block_template,
@@ -111,6 +112,15 @@ class TestRoundedCylinder:
         assert cyl.bounding_box().size.Z == pytest.approx(11)
 
 
+class TestHalfPart:
+    def test_half_part(self):
+        with BuildPart() as whole_part:
+            Box(10, 10, 10, align=(Align.CENTER, Align.CENTER, Align.CENTER))
+        half = half_part(whole_part.part)
+        assert half.is_valid()
+        assert half.volume == pytest.approx(whole_part.part.volume / 2)
+
+
 class TestDiamondCylinder:
     def test_diamond_cylinder(self):
         cyl = diamond_cylinder(5, 10)
@@ -120,9 +130,7 @@ class TestDiamondCylinder:
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_diamond_cylinder_zmax(self):
-        cyl = diamond_cylinder(
-            5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX)
-        )
+        cyl = diamond_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
         assert cyl.is_valid()
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
@@ -159,9 +167,5 @@ class TestBareExecution:
             patch("pathlib.Path.mkdir"),
             patch("ocp_vscode.show"),
         ):
-            loader = SourceFileLoader(
-                "__main__", "src/fb_library/basic_shapes.py"
-            )
-            loader.exec_module(
-                module_from_spec(spec_from_loader(loader.name, loader))
-            )
+            loader = SourceFileLoader("__main__", "src/fb_library/basic_shapes.py")
+            loader.exec_module(module_from_spec(spec_from_loader(loader.name, loader)))
