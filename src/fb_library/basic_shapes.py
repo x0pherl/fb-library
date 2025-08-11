@@ -36,7 +36,11 @@ from build123d import (
 )
 from ocp_vscode import Camera, show
 
-def half_part(base_part: Part) -> Part:
+
+def half_part(
+    base_part: Part,
+    cut_alignment: tuple[Align, Align, Align] = (Align.MAX, Align.CENTER, Align.CENTER),
+) -> Part:
     """
     for a given part, cut it in half along the X axis,
     useful for a cross-section view when debugging a design
@@ -47,10 +51,11 @@ def half_part(base_part: Part) -> Part:
             9999,
             9999,
             9999,
-            align=(Align.MAX, Align.CENTER, Align.CENTER),
+            align=cut_alignment,
             mode=Mode.SUBTRACT,
         )
     return halfpart.part
+
 
 def distance_to_circle_edge(radius, point, angle) -> float:
     """
@@ -68,9 +73,7 @@ def distance_to_circle_edge(radius, point, angle) -> float:
     discriminant = b**2 - 4 * a * c
 
     if discriminant < 0:
-        raise ValueError(
-            f"Error: discriminant calculated as < 0 ({discriminant})"
-        )
+        raise ValueError(f"Error: discriminant calculated as < 0 ({discriminant})")
     t1 = (-b + sqrt(discriminant)) / (2 * a)
     t2 = (-b - sqrt(discriminant)) / (2 * a)
 
@@ -152,9 +155,7 @@ def diamond_cylinder(
 ) -> Part:
     with BuildPart() as tube:
         with BuildSketch():
-            RegularPolygon(
-                radius=radius, side_count=4, align=(align[0], align[1])
-            )
+            RegularPolygon(radius=radius, side_count=4, align=(align[0], align[1]))
             scale(by=stretch)
         extrude(amount=height * stretch[2])
     z_move = 0
@@ -235,9 +236,7 @@ def screw_cut(
             Circle(head_radius)
         with BuildSketch(Plane.XY.offset(head_sink)):
             Circle(head_radius)
-        with BuildSketch(
-            Plane.XY.offset(head_sink + head_radius - shaft_radius)
-        ):
+        with BuildSketch(Plane.XY.offset(head_sink + head_radius - shaft_radius)):
             Circle(shaft_radius)
         with BuildSketch(Plane.XY.offset(shaft_length)):
             Circle(shaft_radius)
@@ -342,8 +341,6 @@ def teardrop_cylinder(
 if __name__ == "__main__":
 
     show(
-        teardrop_cylinder(
-            10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        ),
+        teardrop_cylinder(10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MIN)),
         reset_camera=Camera.KEEP,
-        )
+    )
