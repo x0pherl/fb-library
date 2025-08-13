@@ -881,6 +881,7 @@ def dovetail_subpart(
                     + vertical_offset
                     + vertical_tolerance_adjustment,
                     top_taper_distance=0,  # fix
+                    linear_offset=linear_offset,
                     top_scarf_offset=-scarf_offset + vertical_scarf_offset,
                     tolerance=tolerance,
                     slot_count=slot_count,
@@ -915,7 +916,7 @@ def dovetail_subpart(
                 ),
                 top_taper_distance=taper_offset,
                 top_scarf_offset=scarf_offset
-                + (0 if vertical_offset >= 0 else vertical_scarf_offset),
+                - (0 if vertical_offset >= 0 else vertical_scarf_offset),
                 tolerance=tolerance,
                 slot_count=slot_count,
                 depth=depth,
@@ -941,7 +942,7 @@ def dovetail_subpart(
                     style=style,
                     floor_z=current_floor,
                     floor_taper_distance=0,
-                    floor_scarf_offset=scarf_offset + vertical_scarf_offset,
+                    floor_scarf_offset=scarf_offset - vertical_scarf_offset,
                     top_z=part.bounding_box().max.Z,
                     top_taper_distance=0,
                     top_scarf_offset=scarf_offset,
