@@ -3,6 +3,7 @@ from build123d import (
     BuildPart,
     Box,
     add,
+    Color,
     fillet,
     offset,
     Mode,
@@ -193,7 +194,7 @@ def slide_box(
         divot_radius=divot_radius,
     )
     lid.label = "lid"
-    lid.color = "red"
+    lid.color = Color("red")
 
     box_assembly = Compound(
         label="slide box", children=pack([box_part.part, lid], padding=5, align_z=True)
