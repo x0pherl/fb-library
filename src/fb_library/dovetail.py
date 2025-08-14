@@ -286,12 +286,15 @@ def dovetail_subpart_outline(
     end: Point,
     max_dimension: float = 1000,
     section: DovetailPart = DovetailPart.TAIL,
+    style: DovetailStyle = DovetailStyle.TRADITIONAL,
     linear_offset: float = 0,
     tolerance: float = 0.025,
     tail_angle_offset: float = 15,
     taper_distance: float = 0,
     length_ratio: float = 1 / 3,
     depth_ratio: float = 1 / 6,
+    slot_count: int = 1,
+    depth: float = 2,
     scarf_offset: float = 0,
     straighten_dovetail: bool = False,
 ) -> Line:
@@ -302,6 +305,7 @@ def dovetail_subpart_outline(
         - start: the start point along the XY Plane for the dovetail line
         - end: the end point along the XY Plane for the dovetail line
         - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
+        - style: valid styles are DovetailStyle.TRADITIONAL, DovetailStyle.T_SLOT
         - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
         - tolerance: the tolerance for the split
         - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
@@ -312,6 +316,8 @@ def dovetail_subpart_outline(
         - straighten_dovetail: setting this to True will draw the straight line of the cut,
             allowing for the correct tolerances for the section
     """
+    if style not in (DovetailStyle.TRADITIONAL, DovetailStyle.T_SLOT):
+        raise ValueError(f"Invalid style: {style}")
     direction_multiplier = 1 if section == DovetailPart.TAIL else -1
     base_angle = start.angle_to(end)
     dovetail_tolerance = -(abs(tolerance / 2)) * direction_multiplier
@@ -337,6 +343,18 @@ def dovetail_subpart_outline(
         )
         if straighten_dovetail:
             Line(toleranced_start_point, toleranced_end_point)
+        elif style == DovetailStyle.T_SLOT:
+            add(
+                tslot_split_line(
+                    start=adjusted_start_point,
+                    end=adjusted_end_point,
+                    section=section,
+                    slot_count=slot_count,
+                    depth=depth,
+                    tolerance=tolerance,
+                    taper_distance=taper_distance,
+                )
+            )
         else:
             add(
                 dovetail_split_line(
@@ -388,24 +406,7 @@ def subpart_outline(
         - straighten_dovetail: setting this to True will draw the straight line of the cut,
             allowing for the correct tolerances for the section
     """
-    if style == DovetailStyle.TRADITIONAL:
-        return dovetail_subpart_outline(
-            start=start,
-            end=end,
-            max_dimension=max_dimension,
-            section=section,
-            linear_offset=linear_offset,
-            tolerance=tolerance,
-            tail_angle_offset=tail_angle_offset,
-            taper_distance=taper_distance,
-            length_ratio=length_ratio,
-            depth_ratio=depth_ratio,
-            scarf_offset=scarf_offset,
-            straighten_dovetail=straighten_dovetail,
-        )
-    elif style == DovetailStyle.T_SLOT:
-        return 0
-    else:
+    if style == DovetailStyle.SNUGTAIL:
         return snugtail_subpart_outline(
             start=start,
             end=end,
@@ -416,6 +417,24 @@ def subpart_outline(
             taper_distance=taper_distance,
             length_ratio=length_ratio,
             scarf_offset=scarf_offset,
+            straighten_dovetail=straighten_dovetail,
+        )
+    else:
+        return dovetail_subpart_outline(
+            start=start,
+            end=end,
+            max_dimension=max_dimension,
+            section=section,
+            style=style,
+            linear_offset=linear_offset,
+            tolerance=tolerance,
+            tail_angle_offset=tail_angle_offset,
+            taper_distance=taper_distance,
+            length_ratio=length_ratio,
+            depth_ratio=depth_ratio,
+            scarf_offset=scarf_offset,
+            slot_count=slot_count,
+            depth=depth,
             straighten_dovetail=straighten_dovetail,
         )
 
@@ -663,69 +682,6 @@ def subpart_divots(
             vertical_offset=vertical_offset,
             click_fit_radius=click_fit_radius,
         )
-
-
-def dovetail_subpart_section(
-    start: Point,
-    end: Point,
-    max_dimension: float,
-    section: DovetailPart = DovetailPart.TAIL,
-    style: DovetailStyle = DovetailStyle.SNUGTAIL,
-    floor_z: float = 0,
-    floor_taper_distance: float = 0,
-    floor_scarf_offset: float = 0,
-    top_z: float = 0,
-    top_taper_distance: float = 0,
-    top_scarf_offset: float = 0,
-    tolerance: float = 0.1,
-    slot_count: int = 1,
-    depth: float = 2,
-    tail_angle_offset: float = 15,
-    taper_angle: float = 0,
-    length_ratio: float = 1 / 3,
-    depth_ratio: float = 1 / 6,
-    scarf_angle: float = 0,
-    vertical_offset: float = 0,
-) -> Part:
-    with BuildPart() as intersect:
-        with BuildSketch(Plane.XY.offset(floor_z)):
-            with BuildLine() as baseline:
-                add(
-                    subpart_outline(
-                        start=start,
-                        end=end,
-                        max_dimension=max_dimension,
-                        section=section,
-                        style=style,
-                        tolerance=tolerance,
-                        taper_distance=floor_taper_distance,
-                        slot_count=slot_count,
-                        depth=depth,
-                        scarf_offset=floor_scarf_offset,
-                        straighten_dovetail=straighten_dovetail,
-                    )
-                )
-            make_face()
-        with BuildSketch(Plane.XY.offset(top_z)) as topline:
-            with BuildLine():
-                add(
-                    subpart_outline(
-                        start=start,
-                        end=end,
-                        max_dimension=max_dimension,
-                        section=section,
-                        style=style,
-                        tolerance=tolerance,
-                        taper_distance=top_taper_distance,
-                        slot_count=slot_count,
-                        depth=depth,
-                        scarf_offset=top_scarf_offset,
-                        straighten_dovetail=straighten_dovetail,
-                    )
-                )
-            make_face()
-        loft()
-    return intersect.part
 
 
 def subpart_section(
@@ -978,6 +934,130 @@ def dovetail_subpart(
     return intersect.part
 
 
+def tslot_split_line(
+    start: Point,
+    end: Point,
+    section: DovetailPart = DovetailPart.TAIL,
+    slot_count: int = 1,
+    depth: float = 2,
+    tolerance: float = 0.1,
+    taper_distance=0,
+) -> Line:
+    """
+    given a start and end point, returns a tslot split line as a Line object
+    -------
+    arguments:
+        - start: the start point for the dovetail line
+        - end: the end point for the dovetail line
+        - section: the section of the dovetail to create (DovetailPart.TAIL or DovetailPart.SOCKET)
+        - linear_offset: offsets the center of the tail or socket along the line by the ammount specified
+        - tolerance: the tolerance for the split
+        - tail_angle_offset: the adjustment pitch of angle of the dovetail (0 will result in a square dovetail)
+        - taper_distance: an extra shrinking factor for the dovetail size, allows for easier assembly
+        - length_ratio: the ratio of the length of the tongue to the total length of the dovetail
+        - depth_ratio: the ratio of the depth of the tongue to the total length of the dovetail
+    """
+    base_angle = start.angle_to(end)
+    length = start.distance_to(end)
+    base_width = depth * 2
+    next_distance = (length - (base_width * slot_count)) / (slot_count + 1)
+    dovetail_tolerance = (
+        -(abs(tolerance / 2)) if section == DovetailPart.TAIL else abs(tolerance / 2)
+    )
+
+    adjusted_start_point = start.related_point(base_angle - 90, dovetail_tolerance)
+    adjusted_end_point = adjusted_start_point.related_point(base_angle, length)
+
+    last_point = adjusted_start_point
+
+    with BuildLine() as tslot_outline:
+
+        for slot_index in range(slot_count):
+            root_start = last_point.related_point(base_angle, next_distance)
+            trunk_start = root_start.related_point(
+                base_angle, depth / 2 + dovetail_tolerance + taper_distance
+            )
+            branch_start = trunk_start.related_point(
+                base_angle + 90, depth / 2 + dovetail_tolerance * 2 + taper_distance
+            )
+            mid_trunk_start = midpoint(trunk_start, branch_start)
+            branch_start_inner = branch_start.related_point(base_angle, -depth / 2)
+            branch_start_inner_mid = midpoint(branch_start_inner, branch_start)
+            branch_start_outer = branch_start_inner.related_point(
+                base_angle + 90, depth / 2 - dovetail_tolerance * 2 - taper_distance * 2
+            )
+            branch_start_mid = midpoint(branch_start_inner, branch_start_outer)
+            branch_end_inner = branch_start_inner.related_point(
+                base_angle, depth * 2 - dovetail_tolerance * 2 - taper_distance * 2
+            )
+            branch_end_outer = branch_start_outer.related_point(
+                base_angle, depth * 2 - dovetail_tolerance * 2 - taper_distance * 2
+            )
+            branch_mid = midpoint(branch_start_outer, branch_end_outer)
+            branch_end_mid = midpoint(branch_end_inner, branch_end_outer)
+            branch_end = branch_start.related_point(
+                base_angle, depth - dovetail_tolerance * 2 - taper_distance * 2
+            )
+            branch_end_inner_mid = midpoint(branch_end_inner, branch_end)
+            trunk_end = trunk_start.related_point(
+                base_angle, depth - dovetail_tolerance * 2 - taper_distance * 2
+            )
+            mid_trunk_end = midpoint(trunk_end, branch_end)
+
+            root_end = root_start.related_point(base_angle, depth * 2)
+            FilletPolyline(
+                last_point,
+                trunk_start,
+                mid_trunk_start,
+                radius=abs(tolerance) * (2 if section == DovetailPart.TAIL else 3),
+            )
+            FilletPolyline(
+                mid_trunk_start,
+                branch_start,
+                branch_start_inner_mid,
+                radius=abs(tolerance) * (2 if section == DovetailPart.TAIL else 3),
+            )
+            FilletPolyline(
+                branch_start_inner_mid,
+                branch_start_inner,
+                branch_start_mid,
+                radius=abs(tolerance) * (3 if section == DovetailPart.TAIL else 2),
+            )
+            FilletPolyline(
+                branch_start_mid,
+                branch_start_outer,
+                branch_mid,
+                radius=abs(tolerance) * (3 if section == DovetailPart.TAIL else 2),
+            )
+            FilletPolyline(
+                branch_mid,
+                branch_end_outer,
+                branch_end_mid,
+                radius=abs(tolerance) * (3 if section == DovetailPart.TAIL else 2),
+            )
+            FilletPolyline(
+                branch_end_mid,
+                branch_end_inner,
+                branch_end_inner_mid,
+                radius=abs(tolerance) * (3 if section == DovetailPart.TAIL else 2),
+            )
+            FilletPolyline(
+                branch_end_inner_mid,
+                branch_end,
+                mid_trunk_end,
+                radius=abs(tolerance) * (2 if section == DovetailPart.TAIL else 3),
+            )
+            FilletPolyline(
+                mid_trunk_end,
+                trunk_end,
+                root_end,
+                radius=abs(tolerance) * (2 if section == DovetailPart.TAIL else 3),
+            )
+            last_point = root_end
+        Polyline(last_point, adjusted_end_point)
+    return tslot_outline.line
+
+
 def dovetail_split_line(
     start: Point,
     end: Point,
@@ -990,7 +1070,7 @@ def dovetail_split_line(
     depth_ratio: float = 1 / 6,
 ) -> Line:
     """
-    given a start and end point, returns a dovetail split outline as a Line object
+    given a start and end point, returns a dovetail split line as a Line object
     -------
     arguments:
         - start: the start point for the dovetail line
@@ -1142,56 +1222,76 @@ if __name__ == "__main__":
         Point(-20, 0),
         Point(20, 0),
         section=DovetailPart.TAIL,
+        style=DovetailStyle.T_SLOT,
         tolerance=0.1,
-        vertical_tolerance=0.2,
-        taper_angle=4,
-        scarf_angle=-20,
+        depth=2,
+        slot_count=1,
+        taper_angle=0.25,
+        scarf_angle=2,
         vertical_offset=-14.33333,
         tail_angle_offset=25,
         length_ratio=0.7,
         depth_ratio=0.3,
-        click_fit_radius=0.75,
     ).move(Location((0, 0, 0)))
     sckt = dovetail_subpart(
         test.part,
         Point(-20, 0),
         Point(20, 0),
         section=DovetailPart.SOCKET,
+        style=DovetailStyle.T_SLOT,
         tolerance=0.1,
-        vertical_tolerance=0.2,
-        taper_angle=4,
-        scarf_angle=-20,
+        depth=2,
+        slot_count=1,
+        taper_angle=0.25,
+        scarf_angle=2,
         vertical_offset=-14.33333,
         tail_angle_offset=25,
         length_ratio=0.7,
         depth_ratio=0.3,
-        click_fit_radius=0.75,
     )
     sckt.color = (0.5, 0.5, 0.5)
-    splines = snugtail_subpart_outline(
+    splines = dovetail_subpart_outline(
         Point(-20, 0),
         Point(20, 0),
         section=DovetailPart.SOCKET,
+        style=DovetailStyle.T_SLOT,
         taper_distance=0,
-        tolerance=0.8,
+        tolerance=0.1,
         length_ratio=0.6,
         depth_ratio=0.3,
         tail_angle_offset=35,
+        slot_count=1,
+        depth=2,
         # scarf_angle=20,
         # straighten_dovetail=True,
     )
-    spline = snugtail_subpart_outline(
+    spline = dovetail_subpart_outline(
         Point(-20, 0),
         Point(20, 0),
         section=DovetailPart.TAIL,
+        style=DovetailStyle.T_SLOT,
         taper_distance=0,
-        tolerance=0.8,
+        tolerance=0.1,
         length_ratio=0.6,
         depth_ratio=0.3,
         tail_angle_offset=35,
+        slot_count=1,
+        depth=2,
         # scarf_angle=20,
         # straighten_dovetail=True,
     )
+    # spline = snugtail_subpart_outline(
+    #     Point(-20, 0),
+    #     Point(20, 0),
+    #     section=DovetailPart.TAIL,
+    #     taper_distance=0,
+    #     tolerance=0.8,
+    #     length_ratio=0.6,
+    #     depth_ratio=0.3,
+    #     tail_angle_offset=35,
+    #     # scarf_angle=20,
+    #     # straighten_dovetail=True,
+    # )
     # splines = dovetail_subpart_outline(
     #     test.part,
     #     Point(-20, 0),
@@ -1233,8 +1333,8 @@ if __name__ == "__main__":
         sckt,
         # sk,
         # sks,
-        spline,
-        splines,
+        # spline,
+        # splines,
         reset_camera=Camera.KEEP,
     )
     # export_stl(tl, "tail.stl")

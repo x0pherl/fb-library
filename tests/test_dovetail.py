@@ -17,6 +17,7 @@ from fb_library.dovetail import (
     dovetail_split_line,
     dovetail_subpart,
     snugtail_subpart_outline,
+    dovetail_subpart_outline,
 )
 
 
@@ -117,6 +118,15 @@ class TestDovetail:
                 ),
             )
         assert socket.part.is_valid()
+
+    def test_raises_invalid_style_for_snugtail(self):
+        with pytest.raises(ValueError):
+            dovetail_subpart_outline(
+                start=Point(-5, 0),
+                end=Point(5, 0),
+                section=DovetailPart.SOCKET,
+                style=DovetailStyle.SNUGTAIL,
+            )
 
     def test_valid_tslot_socket(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
