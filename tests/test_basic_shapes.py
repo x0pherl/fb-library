@@ -11,6 +11,7 @@ from fb_library.basic_shapes import (
     half_part,
     rounded_cylinder,
     diamond_cylinder,
+    polygonal_cylinder,
     # rail_block_template,
     nut_cut,
     screw_cut,
@@ -138,14 +139,14 @@ class TestPolygonalCylinder:
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_polygonal_cylinder(self):
-        cyl = diamond_cylinder(5, 10)
+        cyl = polygonal_cylinder(5, 10)
         assert cyl.is_valid()
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_polygonal_cylinder(self):
-        cyl = diamond_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
+        cyl = polygonal_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
         assert cyl.is_valid()
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
