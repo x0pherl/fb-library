@@ -121,7 +121,8 @@ class TestHalfPart:
         assert half.volume == pytest.approx(whole_part.part.volume / 2)
 
 
-class TestDiamondCylinder:
+class TestPolygonalCylinder:
+
     def test_diamond_cylinder(self):
         cyl = diamond_cylinder(5, 10)
         assert cyl.is_valid()
@@ -130,6 +131,20 @@ class TestDiamondCylinder:
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_diamond_cylinder_zmax(self):
+        cyl = diamond_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
+        assert cyl.is_valid()
+        assert cyl.bounding_box().size.X == pytest.approx(10)
+        assert cyl.bounding_box().size.Y == pytest.approx(10)
+        assert cyl.bounding_box().size.Z == pytest.approx(10)
+
+    def test_polygonal_cylinder(self):
+        cyl = diamond_cylinder(5, 10)
+        assert cyl.is_valid()
+        assert cyl.bounding_box().size.X == pytest.approx(10)
+        assert cyl.bounding_box().size.Y == pytest.approx(10)
+        assert cyl.bounding_box().size.Z == pytest.approx(10)
+
+    def test_polygonal_cylinder(self):
         cyl = diamond_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
         assert cyl.is_valid()
         assert cyl.bounding_box().size.X == pytest.approx(10)

@@ -146,13 +146,26 @@ def rounded_cylinder(
     return cylinder.part
 
 
-def diamond_cylinder(
+def polygonal_cylinder(
     radius: float,
     height: float,
+    sides: int = 6,
     rotation: tuple = (0, 0, 0),
     align: tuple = (Align.CENTER, Align.CENTER, Align.CENTER),
     stretch: tuple = (1, 1, 1),
 ) -> Part:
+    """
+    creates an extruded polygon that behaves like a cylinder
+    -------
+    arguments:
+        - radius: the radius of the cylinder
+        - height: the height of the cylinder
+        - sides: the number of sides of the polygonal base (default is 6)
+        - rotation: the rotation of the cylinder
+        - align: the alignment of the cylinder (default
+                is (Align.CENTER, Align.CENTER, Align.CENTER) )
+        - stretch: scales the base polygon
+    """
     with BuildPart() as tube:
         with BuildSketch():
             RegularPolygon(radius=radius, side_count=4, align=(align[0], align[1]))
@@ -168,6 +181,34 @@ def diamond_cylinder(
         .rotate(Axis.X, rotation[0])
         .rotate(Axis.Y, rotation[1])
         .rotate(Axis.Z, rotation[2])
+    )
+
+
+def diamond_cylinder(
+    radius: float,
+    height: float,
+    rotation: tuple = (0, 0, 0),
+    align: tuple = (Align.CENTER, Align.CENTER, Align.CENTER),
+    stretch: tuple = (1, 1, 1),
+) -> Part:
+    """
+    creates an extruded diamond that behaves like a cylinder
+    -------
+    arguments:
+        - radius: the radius of the cylinder
+        - height: the height of the cylinder
+        - rotation: the rotation of the cylinder
+        - align: the alignment of the cylinder (default
+                is (Align.CENTER, Align.CENTER, Align.CENTER) )
+        - stretch: scales the base polygon
+    """
+    return polygonal_cylinder(
+        radius=radius,
+        height=height,
+        sides=4,
+        rotation=rotation,
+        align=align,
+        stretch=stretch,
     )
 
 
