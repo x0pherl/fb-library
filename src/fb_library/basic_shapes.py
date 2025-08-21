@@ -39,6 +39,26 @@ from build123d import (
 from ocp_vscode import Camera, show
 
 
+def radius_to_apothem(radius: float, side_count: int = 6) -> float:
+    """
+    calculates the apothem of a regular polygon given its circumradius
+    -------
+    arguments:
+        - radius: the circumradius of the polygon
+    """
+    return radius * cos(radians(360 / (2 * side_count)))
+
+
+def apothem_to_radius(apothem: float, side_count: int = 6) -> float:
+    """
+    calculates the circumradius of a regular polygon given its apothem
+    -------
+    arguments:
+        - apothem: the apothem of the polygon
+    """
+    return apothem / cos(radians(360 / (2 * side_count)))
+
+
 def half_part(
     base_part: Part,
     cut_alignment: tuple[Align, Align, Align] = (Align.MAX, Align.CENTER, Align.CENTER),

@@ -17,7 +17,19 @@ from fb_library.basic_shapes import (
     screw_cut,
     teardrop_cylinder,
     teardrop_sketch,
+    radius_to_apothem,
+    apothem_to_radius,
 )
+
+
+class TestApothemConversions:
+    def test_apothem_from_radius(self):
+        assert radius_to_apothem(5) == pytest.approx(4.330127018922194)
+        assert radius_to_apothem(5, 8) == pytest.approx(4.619397662556434)
+
+    def test_radius_to_apothem(self):
+        assert apothem_to_radius(5) == pytest.approx(5.773502691896257)
+        assert apothem_to_radius(5, 8) == pytest.approx(5.41196100146197)
 
 
 class TestTearDropSketch:
@@ -149,7 +161,7 @@ class TestPolygonalCylinder:
         cyl = polygonal_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
         assert cyl.is_valid()
         assert cyl.bounding_box().size.X == pytest.approx(10)
-        assert cyl.bounding_box().size.Y == pytest.approx(10)
+        assert cyl.bounding_box().size.Y == pytest.approx(8.660254237844388)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
 
