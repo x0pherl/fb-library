@@ -1,5 +1,7 @@
 """
-utility for creating a bar with a zig-zag shape
+Utility functions for creating and manipulating basic 3D shapes
+and geometric calculations. These functions extend build123d's
+capabilities with shapes and operations commonly used in 3D design.
 """
 
 from math import sqrt, radians, cos, sin
