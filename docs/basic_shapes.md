@@ -108,7 +108,7 @@ Creates a cylinder with rounded (filleted) top and bottom edges.
 polygonal_cylinder(
     radius: float,
     height: float,
-    sides: int = 6,
+    side_count_: int = 6,
     rotation: tuple = (0, 0, 0),
     align: tuple = (Align.CENTER, Align.CENTER, Align.CENTER),
     stretch: tuple = (1, 1, 1)
@@ -120,7 +120,7 @@ Creates an extruded regular polygon that behaves like a cylinder.
 **Arguments:**
 - `radius` (float): The radius of the circumscribed circle
 - `height` (float): The height of the extrusion
-- `sides` (int, default=6): Number of sides of the polygon
+- `side_count_` (int, default=6): Number of sides of the polygon
 - `rotation` (tuple, default=(0, 0, 0)): Rotation angles (X, Y, Z) in degrees
 - `align` (tuple, default=(Align.CENTER, Align.CENTER, Align.CENTER)): Alignment
 - `stretch` (tuple, default=(1, 1, 1)): Scaling factors (X, Y, Z)

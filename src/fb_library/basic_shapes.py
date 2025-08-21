@@ -151,7 +151,7 @@ def rounded_cylinder(
 def polygonal_cylinder(
     radius: float,
     height: float,
-    sides: int = 6,
+    side_count: int = 6,
     rotation: tuple = (0, 0, 0),
     align: tuple = (Align.CENTER, Align.CENTER, Align.CENTER),
     stretch: tuple = (1, 1, 1),
@@ -162,7 +162,7 @@ def polygonal_cylinder(
     arguments:
         - radius: the radius of the cylinder
         - height: the height of the cylinder
-        - sides: the number of sides of the polygonal base (default is 6)
+        - side_count: the number of sides of the polygonal base (default is 6)
         - rotation: the rotation of the cylinder
         - align: the alignment of the cylinder (default
                 is (Align.CENTER, Align.CENTER, Align.CENTER) )
@@ -170,7 +170,9 @@ def polygonal_cylinder(
     """
     with BuildPart() as tube:
         with BuildSketch():
-            RegularPolygon(radius=radius, side_count=4, align=(align[0], align[1]))
+            RegularPolygon(
+                radius=radius, side_count=side_count, align=(align[0], align[1])
+            )
             scale(by=stretch)
         extrude(amount=height * stretch[2])
     z_move = 0
@@ -207,7 +209,7 @@ def diamond_cylinder(
     return polygonal_cylinder(
         radius=radius,
         height=height,
-        sides=4,
+        side_count=4,
         rotation=rotation,
         align=align,
         stretch=stretch,
@@ -384,6 +386,6 @@ def teardrop_cylinder(
 if __name__ == "__main__":
 
     show(
-        teardrop_cylinder(10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MIN)),
+        polygonal_cylinder(10, 11, 6, align=(Align.MIN, Align.MIN, Align.CENTER)),
         reset_camera=Camera.KEEP,
     )
