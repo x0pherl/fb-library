@@ -4,12 +4,27 @@ Utility functions for creating and manipulating basic 3D shapes and geometric ca
 
 ## Geometric Calculation
 
+### apothem_to_radius
+
+```python
+def apothem_to_radius(apothem: float, side_count: int = 6) -> float
+```
+
+**Arguments**
+- `apothem` (float): The apothem of the polygon
+- `side_count` (float): The number of sides of the poygon.
+
+**Returns:**
+- `float`: The radius of the polygon
+
 ### circular_intersection
 
 ```python
 circular_intersection(radius: float, coordinate: float) -> float
 ```
 
+calculates the circumradius of a regular polygon given its apothem
+    
 Finds the intersection point along one axis given a coordinate on the other axis of a circle's perimeter.
 
 **Arguments:**
@@ -40,6 +55,19 @@ Calculates the distance from a given point to the edge of a circle in a specifie
 
 **Raises:**
 - `ValueError`: If the discriminant is negative (no intersection)
+
+### radius_to_appothem
+
+```python
+def radius_to_appothem(radius: float, side_count: int = 6) -> float
+```
+
+**Arguments:**
+- `radius` (float): the radius of the polygon
+- `side_count` (float): the number of sides of the polygon
+
+**Returns:**
+- `float`: The apothem of the polygon
 
 ## Part Generaction
 
