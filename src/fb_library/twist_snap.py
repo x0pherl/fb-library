@@ -47,7 +47,7 @@ from ocp_vscode import Camera, show
 
 
 def twist_snap_connector(
-    connector_diameter: float = 4.5,
+    connector_radius: float = 4.5,
     tolerance: float = 0.12,
     arc_percentage: float = 10,
     snapfit_count: int = 4,
@@ -60,7 +60,7 @@ def twist_snap_connector(
     Returns a build123d Part a connector that locks into a socket with a twist.
     ----------
     Arguments:
-        - connector_diameter: the base diamaeter of the connector mechanism
+        - connector_radius: the base radius of the connector mechanism
         - tolerance: the spacing between the connector and the socket
         - arc_percentage: the percentage of the arc that the snapfit will cover
         - snapfit_count: how many snapfit mechanisms to add
@@ -71,7 +71,7 @@ def twist_snap_connector(
     """
     with BuildPart() as twistbase:
         Cylinder(
-            radius=connector_diameter,
+            radius=connector_radius,
             height=wall_depth * 2,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
@@ -114,10 +114,7 @@ def twist_snap_connector(
                 min(
                     snapfit_radius_extension / 8,
                     snapfit.part.max_fillet(
-                        snapfit.faces()
-                        .sort_by(Axis.Y)[-2:]
-                        .edges()
-                        .filter_by(Axis.Z),
+                        snapfit.faces().sort_by(Axis.Y)[-2:].edges().filter_by(Axis.Z),
                         max_iterations=40,
                     ),
                 ),
@@ -129,7 +126,7 @@ def twist_snap_connector(
 
 
 def twist_snap_socket(
-    connector_diameter: float = 4.5,
+    connector_radius: float = 4.5,
     tolerance: float = 0.12,
     arc_percentage: float = 10,
     snapfit_count: int = 4,
@@ -141,23 +138,21 @@ def twist_snap_socket(
     """
     Returns a Part for the defined twist snap socket
     """
-    outer_socket_radius = connector_diameter + wall_width * 4 / 3
+    outer_socket_radius = connector_radius + wall_width * 4 / 3
     with BuildPart() as socket_fitting:
         Cylinder(
             radius=outer_socket_radius,
             height=wall_depth,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
-        with BuildPart(
-            socket_fitting.faces().sort_by(Axis.Z)[-1]
-        ) as snap_socket:
+        with BuildPart(socket_fitting.faces().sort_by(Axis.Z)[-1]) as snap_socket:
             Cylinder(
                 radius=outer_socket_radius,
                 height=wall_depth * 2,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
             )
             Cylinder(
-                radius=connector_diameter + tolerance,
+                radius=connector_radius + tolerance,
                 height=wall_depth * 2,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
                 mode=Mode.SUBTRACT,
@@ -228,7 +223,7 @@ def twist_snap_socket(
         with PolarLocations(0, snapfit_count):
             add(snapfit.part, mode=Mode.SUBTRACT)
         with PolarLocations(
-            connector_diameter + snapfit_radius_extension + tolerance * 2,
+            connector_radius + snapfit_radius_extension + tolerance * 2,
             snapfit_count,
             start_angle=arc_percentage * -4,
         ):
@@ -244,7 +239,7 @@ def twist_snap_socket(
 if __name__ == "__main__":
     connector = (
         twist_snap_connector(
-            connector_diameter=4.5,
+            connector_radius=4.5,
             tolerance=0.12,
             snapfit_height=2,
             snapfit_radius_extension=2 * (2 / 3) - 0.06,
@@ -255,7 +250,7 @@ if __name__ == "__main__":
         .move(Location((0, 0, 15)))
     )
     socket = twist_snap_socket(
-        connector_diameter=4.5,
+        connector_radius=4.5,
         tolerance=0.12,
         snapfit_height=2,
         snapfit_radius_extension=2 * (2 / 3) - 0.06,

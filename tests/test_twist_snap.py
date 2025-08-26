@@ -20,16 +20,12 @@ class TestTwistSnap:
             patch("ocp_vscode.show"),
             patch("ocp_vscode.save_screenshot"),
         ):
-            loader = SourceFileLoader(
-                "__main__", "src/fb_library/twist_snap.py"
-            )
-            loader.exec_module(
-                module_from_spec(spec_from_loader(loader.name, loader))
-            )
+            loader = SourceFileLoader("__main__", "src/fb_library/twist_snap.py")
+            loader.exec_module(module_from_spec(spec_from_loader(loader.name, loader)))
 
     def test_twist_snap_connector(self):
         connector = twist_snap_connector(
-            connector_diameter=4.5,
+            connector_radius=4.5,
             tolerance=0.12,
             snapfit_height=2,
             snapfit_radius_extension=2 * (2 / 3) - 0.06,
@@ -40,7 +36,7 @@ class TestTwistSnap:
 
     def test_twist_snap_socket(self):
         socket = twist_snap_socket(
-            connector_diameter=4.5,
+            connector_radius=4.5,
             tolerance=0.12,
             snapfit_height=2,
             snapfit_radius_extension=2 * (2 / 3) - 0.06,

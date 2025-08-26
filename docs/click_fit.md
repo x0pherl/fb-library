@@ -10,7 +10,7 @@ The `click_fit` module provides a divot function to create parts for snap fit co
 
 #### arguments
 
- - connector_diameter: the base diamaeter of the connector mechanism
+ - connector_radius: the base radius of the connector mechanism
  - tolerance: the spacing between the connector and the socket
  - arc_percentage: the percentage of the arc that the snapfit will cover
  - snapfit_count: how many snapfit mechanisms to add
@@ -23,7 +23,7 @@ The `click_fit` module provides a divot function to create parts for snap fit co
 
 #### arguments
 
- - connector_diameter: the base diamaeter of the connector mechanism
+ - connector_radius: the base radius of the connector mechanism
  - tolerance: the spacing between the connector and the socket
  - arc_percentage: the percentage of the arc that the snapfit will cover
  - snapfit_count: how many snapfit mechanisms to add
@@ -38,7 +38,7 @@ from fb_library import twist_snap_connector, twist_snap_socket
 
    connector = (
         twist_snap_connector(
-            connector_diameter=4.5,
+            connector_radius=4.5,
             tolerance=0.12,
             snapfit_height=2,
             snapfit_radius_extension=2 * (2 / 3) - 0.06,
@@ -49,7 +49,7 @@ from fb_library import twist_snap_connector, twist_snap_socket
         .move(Location((0, 0, 15)))
     )
     socket = twist_snap_socket(
-        connector_diameter=4.5,
+        connector_radius=4.5,
         tolerance=0.12,
         snapfit_height=2,
         snapfit_radius_extension=2 * (2 / 3) - 0.06,
