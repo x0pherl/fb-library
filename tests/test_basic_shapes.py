@@ -164,6 +164,47 @@ class TestPolygonalCylinder:
         assert cyl.bounding_box().size.Y == pytest.approx(8.660254237844388)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
+    def test_teardrop_cylinder_z_alignment(self):
+        radius = 5
+        peak_distance = 6
+        height = 10
+
+        # Test Align.MAX (line 201-202)
+        cylinder_max = teardrop_cylinder(
+            radius=radius,
+            peak_distance=peak_distance,
+            height=height,
+            align=(Align.CENTER, Align.CENTER, Align.MAX),
+        )
+        assert cylinder_max.is_valid()
+
+        # Test Align.CENTER (line 203)
+        cylinder_center = teardrop_cylinder(
+            radius=radius,
+            peak_distance=peak_distance,
+            height=height,
+            align=(Align.CENTER, Align.CENTER, Align.CENTER),
+        )
+        assert cylinder_center.is_valid()
+
+        # Test Align.MIN (default case, not explicitly in those lines but completes coverage)
+        cylinder_min = teardrop_cylinder(
+            radius=radius,
+            peak_distance=peak_distance,
+            height=height,
+            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        )
+        assert cylinder_min.is_valid()
+
+        # Verify that different alignments produce different Z positions
+        # This ensures the alignment logic is actually working
+        max_bbox_max_z = cylinder_max.bounding_box().max.Z
+        center_bbox_max_z = cylinder_center.bounding_box().max.Z
+        min_bbox_max_z = cylinder_min.bounding_box().max.Z
+
+        # MAX should be highest, MIN should be lowest
+        assert min_bbox_max_z > center_bbox_max_z > max_bbox_max_z
+
 
 class TestScrewCut:
     def test_screw_cut(self):
