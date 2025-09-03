@@ -27,9 +27,7 @@ class Point:
         "the y coordinate of the point"
         return self.y
 
-    def __init__(
-        self, x: Union[float, list[float, float]] = None, y: float = None
-    ):
+    def __init__(self, x: Union[float, list[float, float]] = None, y: float = None):
         """initialze the point with x and y coordinates passed as a tuple or idividual values"""
         if isinstance(x, list) and len(x) >= 2:
             self.x, self.y = x

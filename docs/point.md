@@ -18,10 +18,11 @@ Point([1,3])
 ```
 Once you've defined a point, you can access the x or y values through a variety of means:
 ```
-x = Point(1,3)
-x.x # returns the x coordinate (1)
-x.Y # returns the y coordinate (3)
-x[1] # returns the y coordinate (3)
+p = Point(1,3)
+p.x # returns the x coordinate (1)
+p.y # returns the y coordinate (3)
+p.[0] # returns the x coordinate (1)
+p[1] # returns the y coordinate (3)
 ```
 
 ### Methods
