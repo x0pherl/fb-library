@@ -21,7 +21,7 @@ Once you've defined a point, you can access the x or y values through a variety 
 p = Point(1,3)
 p.x # returns the x coordinate (1)
 p.y # returns the y coordinate (3)
-p.[0] # returns the x coordinate (1)
+p[0] # returns the x coordinate (1)
 p[1] # returns the y coordinate (3)
 ```
 
@@ -54,7 +54,7 @@ p[1] # returns the y coordinate (3)
 - `midpoint(point1: Point, point2: Point) -> Point`
   - Finds the midpoint between two points.
     ```
-    from point import midpoint
+    from fb_library.point import midpoint
     midpoint(Point(0,0), Point(10,10))
     # returns Point(x=5.0, y=5.0)
     ```
@@ -63,7 +63,7 @@ p[1] # returns the y coordinate (3)
   - Finds the midpoint between two points, shifted by `shift` towards the second point.
   This can be useful when you need to make something slightly off center between two arbitrary points, or when adding points at regular midpoints of a line
     ```
-    from point import shifted_midpoint
+    from fb_library.point import shifted_midpoint
     shifted_midpoint(Point(0,0), Point(3,3), 1)
-    # rturns Point(x=2.2071067811865475, y=2.2071067811865475)
+    # returns Point(x=2.2071067811865475, y=2.2071067811865475)
     ```
