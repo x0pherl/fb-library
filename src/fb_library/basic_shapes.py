@@ -4,7 +4,7 @@ and geometric calculations. These functions extend build123d's
 capabilities with shapes and operations commonly used in 3D design.
 """
 
-from math import sqrt, radians, cos, sin
+from math import sqrt, radians, cos, sin, tan
 
 from build123d import (
     Align,
@@ -57,6 +57,30 @@ def apothem_to_radius(apothem: float, side_count: int = 6) -> float:
         - apothem: the apothem of the polygon
     """
     return apothem / cos(radians(360 / (2 * side_count)))
+
+
+def opposite_length(angle: float, adjacent_length: float) -> float:
+    """calculate the opposite side length of a right triangle given the angle and adjacent side length
+    ----------
+    Arguments:
+        - angle: float
+            The angle in degrees.
+        - adjacent_length: float
+            The length of the adjacent side."""
+    angle_rad = radians(angle)
+    return adjacent_length * tan(angle_rad)
+
+
+def adjacent_length(angle: float, opposite_length: float) -> float:
+    """calculate the adjacent side length of a right triangle given the angle and opposite side length
+    ----------
+    Arguments:
+        - angle: float
+            The angle in degrees.
+        - opposite_length: float
+            The length of the opposite side."""
+    angle_rad = radians(angle)
+    return opposite_length / tan(angle_rad)
 
 
 def half_part(

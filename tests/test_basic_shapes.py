@@ -19,6 +19,8 @@ from fb_library.basic_shapes import (
     teardrop_sketch,
     radius_to_apothem,
     apothem_to_radius,
+    opposite_length,
+    adjacent_length,
 )
 
 
@@ -30,6 +32,26 @@ class TestApothemConversions:
     def test_radius_to_apothem(self):
         assert apothem_to_radius(5) == pytest.approx(5.773502691896257)
         assert apothem_to_radius(5, 8) == pytest.approx(5.41196100146197)
+
+
+class TestTriangleFunctions:
+    def test_opposite_length(self):
+        # For a 45-degree angle, opposite = adjacent * tan(45°) = adjacent * 1
+        opposite = opposite_length(45, 5)
+        assert opposite == pytest.approx(5.0)
+
+        # For a 30-degree angle, opposite = adjacent * tan(30°) = adjacent * (1/√3)
+        opposite = opposite_length(30, 10)
+        assert opposite == pytest.approx(5.773502691896257)
+
+    def test_adjacent_length(self):
+        # For a 45-degree angle, adjacent = opposite / tan(45°) = opposite / 1
+        adjacent = adjacent_length(45, 5)
+        assert adjacent == pytest.approx(5.0)
+
+        # For a 30-degree angle, adjacent = opposite / tan(30°) = opposite / (1/√3) = opposite * √3
+        adjacent = adjacent_length(30, 10)
+        assert adjacent == pytest.approx(17.320508075688772)
 
 
 class TestTearDropSketch:

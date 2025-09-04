@@ -4,6 +4,22 @@ Utility functions for creating and manipulating basic 3D shapes and geometric ca
 
 ## Geometric Calculation
 
+### adjacent_length
+
+```python
+def adjacent_length(angle: float, opposite_length: float) -> float
+```
+
+Calculates the adjacent side length of a right triangle given the angle and opposite side length.
+
+**Arguments:**
+- `angle` (float): The angle in degrees
+- `opposite_length` (float): The length of the opposite side
+
+**Returns:**
+- `float`: The length of the adjacent side
+
+
 ### apothem_to_radius
 
 ```python
@@ -55,6 +71,21 @@ Calculates the distance from a given point to the edge of a circle in a specifie
 
 **Raises:**
 - `ValueError`: If the discriminant is negative (no intersection)
+
+### opposite_length
+
+```python
+def opposite_length(angle: float, adjacent_length: float) -> float
+```
+
+Calculates the opposite side length of a right triangle given the angle and adjacent side length.
+
+**Arguments:**
+- `angle` (float): The angle in degrees
+- `adjacent_length` (float): The length of the adjacent side
+
+**Returns:**
+- `float`: The length of the opposite side
 
 ### radius_to_appothem
 
@@ -307,7 +338,9 @@ from fb_library.basic_shapes import (
     diamond_torus, 
     teardrop_cylinder,
     screw_cut,
-    half_part
+    half_part,
+    opposite_length,
+    adjacent_length
 )
 from build123d import BuildPart, Mode
 
@@ -334,6 +367,10 @@ screw_hole = screw_cut(
     shaft_radius=2.5,
     shaft_length=25
 )
+
+# Calculate triangle dimensions
+opp = opposite_length(30, 10)  # Given 30° angle and adjacent side of 10
+adj = adjacent_length(45, 5)   # Given 45° angle and opposite side of 5
 
 # Create a cross-section view
 cross_section = half_part(part.part)
