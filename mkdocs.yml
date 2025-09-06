@@ -1,5 +1,13 @@
-site_name: fb-library
-site_url: https://fb-library.readthedocs.io/
+site_name: fb-librnav:
+  - Overview: index.md
+  - Developer's Guide:
+    - Basic Shapes: basic_shapes.md
+    - clickfit: click_fit.md
+    - dovetail: dovetail.md
+    - HexWall: hexwall.md
+    - High Top Slide Box: high_top_slide_box.md
+    - Point: point.md
+    - twist_snap: twist_snap.md_url: https://fb-library.readthedocs.io/
 theme:
   name: material
   features:
@@ -19,8 +27,10 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Developer’s Guide:
+    - Basic Shapes: basic_shapes.md
     - clickfit: click_fit.md
     - dovetail: dovetail.md
     - HexWall: hexwall.md
+    - high_top_slide_box: high_top_slide_box.md
     - Point: point.md
     - twist_snap: twist_snap.md
