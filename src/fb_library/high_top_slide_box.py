@@ -6,6 +6,7 @@ from build123d import (
     BuildPart,
     BuildSketch,
     Compound,
+    GridLocations,
     Location,
     Part,
     PolarLocations,
@@ -331,6 +332,28 @@ def high_top_slide_box_base(
                     cut_template=True,
                 )
             )
+        with BuildPart(
+            Location(
+                (
+                    0,
+                    -part_depth / 2 + wall_thickness,
+                    part_height
+                    - top_height
+                    - rail_height
+                    - wall_thickness
+                    + tolerance * 2,
+                )
+            ),
+            mode=Mode.SUBTRACT,
+        ):
+            with GridLocations(part_width, 0, 2, 1) as grid_locs:
+                add(
+                    diamond_cylinder(
+                        radius=wall_thickness,
+                        height=part_height * 2,
+                        align=(Align.CENTER, Align.CENTER, Align.MIN),
+                    )
+                )
 
     boxbottom.part.label = "box bottom"
     return boxbottom.part
@@ -399,6 +422,5 @@ if __name__ == "__main__":
         .rotate(Axis.Y, 180)
         .move(Location((44 + 5, 44, sb.children[1].bounding_box().size.Z + 4 - 0.1)))
     )
-    bottom = sb.children[1]
     # show(sb, reset_camera=Camera.KEEP)
-    show(top, bottom, reset_camera=Camera.KEEP)
+    show(sb.children[0], sb.children[1], reset_camera=Camera.KEEP)
