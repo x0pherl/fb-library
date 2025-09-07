@@ -420,7 +420,7 @@ if __name__ == "__main__":
         sb.children[0]
         .rotate(Axis.Z, 180)
         .rotate(Axis.Y, 180)
-        .move(Location((44 + 5, 44, sb.children[1].bounding_box().size.Z + 4 - 0.1)))
+        .move(Location((-44 - 5, 44, sb.children[1].bounding_box().size.Z + 4 - 0.1)))
     )
     # show(sb, reset_camera=Camera.KEEP)
-    show(sb.children[0], sb.children[1], reset_camera=Camera.KEEP)
+    show(top, sb.children[1], reset_camera=Camera.KEEP)
