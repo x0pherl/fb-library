@@ -1,6 +1,6 @@
 [project]
 name = "fb-library"
-version = "0.0.32"
+version = "0.0.33"
 authors = [
   { name="x0pherl"},
 ]

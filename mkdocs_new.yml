@@ -19,7 +19,6 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Developer's Guide:
-    - Ball Socket: ball_socket.md
     - Basic Shapes: basic_shapes.md
     - clickfit: click_fit.md
     - dovetail: dovetail.md
