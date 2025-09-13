@@ -31,6 +31,21 @@ def _slide_top_rail_cut(
     rail_angle: float = 0,
     effective_tolerance: float = 0.05,
 ):
+    """
+    Creates the rail cut geometry for the sliding mechanism of a high top slide box.
+
+    This internal function generates the precise cut pattern needed for the sliding rails,
+    including diamond-shaped guides and tolerance adjustments. The rails allow smooth
+    sliding motion while maintaining secure positioning.
+
+    args:
+        - part_width: the width of the base part in millimeters
+        - part_depth: the depth of the base part in millimeters
+        - rail_height: the height of the rail system in millimeters
+        - wall_thickness: the thickness of the box walls in millimeters
+        - rail_angle: the angle of the rails in degrees for improved sliding
+        - effective_tolerance: the calculated tolerance for the sliding fit
+    """
     rail_front_right = Point(
         (part_width - wall_thickness * 2 / 3 + effective_tolerance) / 2,
         (part_depth - wall_thickness) / 2,
@@ -161,6 +176,24 @@ def _high_top_slide_box_top(
     tolerance: float = 0.2,
     cut_template: bool = False,
 ) -> Part:
+    """
+    Creates the top component for a high top slide box with rails and optional divots.
+
+    This internal function generates either the actual sliding lid or a template for cutting
+    the base, depending on the cut_template parameter. It includes rail geometry, divots for
+    positioning feedback, and proper tolerance adjustments.
+
+    args:
+        - base_part: the base part that defines the outer dimensions
+        - top_height: the height of the sliding top portion in millimeters
+        - rail_height: the height of the rail system in millimeters
+        - wall_thickness: the thickness of the box walls in millimeters
+        - rail_angle: the angle of the rails in degrees for smoother sliding
+        - divot_radius: the radius of positioning divots, set to 0 to disable
+        - thumb_radius: the radius for thumb grips (currently unused)
+        - tolerance: the clearance between moving parts in millimeters
+        - cut_template: whether this is for cutting (True) or building the lid (False)
+    """
     effective_tolerance = abs(tolerance) / (-2 if cut_template else 2)
     with BuildPart() as top:
         part_width = base_part.bounding_box().size.X
@@ -256,6 +289,23 @@ def high_top_slide_box_lid(
     thumb_radius: float = 0,
     tolerance: float = 0.2,
 ) -> Part:
+    """
+    Creates the sliding lid component for a high top slide box.
+
+    The lid features rails that slide smoothly into the base component, with optional
+    divots for tactile positioning feedback. The lid maintains the top portion of the
+    original part while adding the necessary sliding mechanism.
+
+    args:
+        - base_part: the base part that defines the outer dimensions
+        - top_height: the height of the sliding top portion in millimeters
+        - rail_height: the height of the rail system in millimeters
+        - wall_thickness: the thickness of the box walls in millimeters
+        - rail_angle: the angle of the rails in degrees for smoother sliding
+        - divot_radius: the radius of positioning divots, set to 0 to disable
+        - thumb_radius: the radius for thumb grips (currently unused)
+        - tolerance: the clearance between moving parts in millimeters
+    """
     lid = _high_top_slide_box_top(
         base_part,
         top_height,
@@ -281,6 +331,23 @@ def high_top_slide_box_base(
     thumb_radius: float = 0,
     tolerance: float = 0.2,
 ) -> Part:
+    """
+    Creates the base component for a high top slide box with rail channels.
+
+    The base is hollowed out to create storage space and includes channels that receive
+    the sliding lid's rails. Diamond-shaped guide cylinders help ensure smooth operation
+    and proper alignment of the sliding mechanism.
+
+    args:
+        - base_part: the base part that defines the outer dimensions
+        - top_height: the height of the sliding top portion in millimeters
+        - rail_height: the height of the rail system in millimeters
+        - wall_thickness: the thickness of the box walls in millimeters
+        - rail_angle: the angle of the rails in degrees for smoother sliding
+        - divot_radius: the radius of positioning divots, set to 0 to disable
+        - thumb_radius: the radius for thumb grips (currently unused)
+        - tolerance: the clearance between moving parts in millimeters
+    """
     part_width = base_part.bounding_box().size.X
     part_depth = base_part.bounding_box().size.Y
     part_height = base_part.bounding_box().size.Z
@@ -369,35 +436,49 @@ def high_top_slide_box(
     thumb_radius: float = 0,
     tolerance: float = 0.2,
 ) -> Compound:
+    """
+    Creates a complete high top slide box with both lid and base components.
+
+    This function generates a sliding box system where the lid has significant height
+    and slides on rails into the base. The system uses diamond-shaped rails for smooth
+    operation and includes optional divots for positioning feedback. The lid is automatically
+    oriented for 3D printing.
+
+    args:
+        - base_part: the base part that defines the outer dimensions of the box
+        - top_height: the height of the sliding top portion in millimeters
+        - rail_height: the height of the rail system that guides sliding motion
+        - wall_thickness: the thickness of the box walls in millimeters
+        - rail_angle: the angle of the rails in degrees for smoother sliding
+        - divot_radius: the radius of positioning divots, set to 0 to disable
+        - thumb_radius: the radius for thumb grips (currently unused)
+        - tolerance: the clearance between moving parts in millimeters
+    """
 
     return Compound(
         label="slide box",
-        children=pack(
-            [
-                high_top_slide_box_lid(
-                    base_part=base_part,
-                    top_height=top_height,
-                    rail_height=rail_height,
-                    wall_thickness=wall_thickness,
-                    rail_angle=rail_angle,
-                    divot_radius=divot_radius,
-                    thumb_radius=thumb_radius,
-                    tolerance=tolerance,
-                ).rotate(Axis.X, 180),
-                high_top_slide_box_base(
-                    base_part=base_part,
-                    top_height=top_height,
-                    rail_height=rail_height,
-                    wall_thickness=wall_thickness,
-                    rail_angle=rail_angle,
-                    divot_radius=divot_radius,
-                    thumb_radius=thumb_radius,
-                    tolerance=tolerance,
-                ),
-            ],
-            padding=5,
-            align_z=True,
-        ),
+        children=[
+            high_top_slide_box_lid(
+                base_part=base_part,
+                top_height=top_height,
+                rail_height=rail_height,
+                wall_thickness=wall_thickness,
+                rail_angle=rail_angle,
+                divot_radius=divot_radius,
+                thumb_radius=thumb_radius,
+                tolerance=tolerance,
+            ).rotate(Axis.X, 180),
+            high_top_slide_box_base(
+                base_part=base_part,
+                top_height=top_height,
+                rail_height=rail_height,
+                wall_thickness=wall_thickness,
+                rail_angle=rail_angle,
+                divot_radius=divot_radius,
+                thumb_radius=thumb_radius,
+                tolerance=tolerance,
+            ),
+        ],
     )
 
 
@@ -417,10 +498,13 @@ if __name__ == "__main__":
         tolerance=0.1,
     )
     top = (
-        sb.children[0]
-        .rotate(Axis.Z, 180)
-        .rotate(Axis.Y, 180)
-        .move(Location((-44 - 5, 44, sb.children[1].bounding_box().size.Z + 4 - 0.1)))
+        sb.children[0].move(Location((0, 0, 19)))
+        # .rotate(Axis.Z, 180)
+        # .rotate(Axis.Y, 180)
+        # .move(Location((-44 - 5, 44, sb.children[1].bounding_box().size.Z + 4 - 0.1)))
     )
     # show(sb, reset_camera=Camera.KEEP)
-    show(top, sb.children[1], reset_camera=Camera.KEEP)
+    show(
+        pack([top, sb.children[1]], padding=5, align_z=True),
+        reset_camera=Camera.KEEP,
+    )
