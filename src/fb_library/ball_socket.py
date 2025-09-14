@@ -87,35 +87,37 @@ def ball_socket(
     with BuildPart() as socket:
         Cylinder(
             radius=ball_radius + wall_thickness,
-            height=ball_radius * 2,
+            height=ball_radius * 2 - wall_thickness,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
-        with BuildPart(Location((0, 0, ball_radius * 2)), mode=Mode.SUBTRACT):
+        with BuildPart(
+            Location((0, 0, ball_radius * 2 - wall_thickness)), mode=Mode.SUBTRACT
+        ):
             Cylinder(
                 radius=ball_radius + tolerance,
-                height=wall_thickness,
+                height=ball_radius,
                 align=(Align.CENTER, Align.CENTER, Align.MAX),
             )
-        with BuildPart(Plane.XY.offset(wall_thickness), mode=Mode.SUBTRACT) as bowl_cut:
-            Sphere(
-                radius=ball_radius + tolerance,
-                align=(Align.CENTER, Align.CENTER, Align.MIN),
-            )
-        with BuildPart(Location((0, 0, ball_radius * 2))) as flange:
+        with BuildPart(Location((0, 0, ball_radius * 2 - wall_thickness))) as flange:
             Cylinder(
                 radius=ball_radius + tolerance,
-                height=wall_thickness,
+                height=ball_radius,
                 align=(Align.CENTER, Align.CENTER, Align.MAX),
             )
             Cylinder(
                 radius=ball_radius - wall_thickness * 0.66 + tolerance,
-                height=wall_thickness,
+                height=ball_radius,
                 align=(Align.CENTER, Align.CENTER, Align.MAX),
                 mode=Mode.SUBTRACT,
             )
             fillet(
                 flange.faces().sort_by(Axis.Z)[-1].inner_wires().edge(),
                 wall_thickness * 0.4,
+            )
+        with BuildPart(Plane.XY.offset(wall_thickness), mode=Mode.SUBTRACT) as bowl_cut:
+            Sphere(
+                radius=ball_radius + tolerance,
+                align=(Align.CENTER, Align.CENTER, Align.MIN),
             )
         with BuildPart(
             Plane.XY.offset(ball_radius * 1.5 - wall_thickness), mode=Mode.SUBTRACT
@@ -141,6 +143,6 @@ def ball_socket(
 if __name__ == "__main__":
     show(
         ball_mount(15),
-        ball_socket(15).rotate(Axis.X, 180).move(Location((0, 0, 52.5))),
+        ball_socket(15),  # .rotate(Axis.X, 180).move(Location((0, 0, 52.5))),
         reset_camera=Camera.KEEP,
     )
