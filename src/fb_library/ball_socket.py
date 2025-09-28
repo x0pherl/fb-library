@@ -57,6 +57,8 @@ def ball_mount(ball_radius: float) -> Part:
                     align=(Align.CENTER, Align.CENTER),
                 )
             loft()
+
+    ballmount.part.label = "Ball Mount"
     return ballmount.part
 
 
@@ -87,40 +89,47 @@ def ball_socket(
     with BuildPart() as socket:
         Cylinder(
             radius=ball_radius + wall_thickness,
-            height=ball_radius * 2 - wall_thickness,
+            height=ball_radius + wall_thickness * 2.5,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
-        with BuildPart(
-            Location((0, 0, ball_radius * 2 - wall_thickness)), mode=Mode.SUBTRACT
-        ):
-            Cylinder(
-                radius=ball_radius + tolerance,
-                height=ball_radius,
-                align=(Align.CENTER, Align.CENTER, Align.MAX),
-            )
-        with BuildPart(Location((0, 0, ball_radius * 2 - wall_thickness))) as flange:
-            Cylinder(
-                radius=ball_radius + tolerance,
-                height=ball_radius,
-                align=(Align.CENTER, Align.CENTER, Align.MAX),
-            )
-            Cylinder(
-                radius=ball_radius - wall_thickness * 0.66 + tolerance,
-                height=ball_radius,
-                align=(Align.CENTER, Align.CENTER, Align.MAX),
-                mode=Mode.SUBTRACT,
-            )
-            fillet(
-                flange.faces().sort_by(Axis.Z)[-1].inner_wires().edge(),
-                wall_thickness * 0.4,
-            )
+        # with BuildPart(
+        #     Location((0, 0, ball_radius + wall_thickness * 2)), mode=Mode.SUBTRACT
+        # ):
+        #     Cylinder(
+        #         radius=ball_radius + tolerance,
+        #         height=ball_radius,
+        #         align=(Align.CENTER, Align.CENTER, Align.MAX),
+        #     )
+        # with BuildPart(Location((0, 0, ball_radius + wall_thickness * 2))) as flange:
+        #     Cylinder(
+        #         radius=ball_radius + tolerance,
+        #         height=ball_radius,
+        #         align=(Align.CENTER, Align.CENTER, Align.MAX),
+        #     )
+        #     Cylinder(
+        #         radius=ball_radius - wall_thickness * 0.55 + tolerance,
+        #         height=ball_radius,
+        #         align=(Align.CENTER, Align.CENTER, Align.MAX),
+        #         mode=Mode.SUBTRACT,
+        #     )
+        #     fillet(
+        #         flange.faces().sort_by(Axis.Z)[-1].inner_wires().edge(),
+        #         wall_thickness * 0.4,
+        #     )
         with BuildPart(Plane.XY.offset(wall_thickness), mode=Mode.SUBTRACT) as bowl_cut:
             Sphere(
                 radius=ball_radius + tolerance,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
             )
+        # Fillet the top edge if inner wires exist (after sphere subtraction they may not)
+        top_face = socket.faces().sort_by(Axis.Z)[-1]
+        if top_face.inner_wires():
+            fillet(
+                top_face.inner_wires().edge(),
+                min(wall_thickness * 0.4, ball_radius * 0.1),  # Limit fillet radius
+            )
         with BuildPart(
-            Plane.XY.offset(ball_radius * 1.5 - wall_thickness), mode=Mode.SUBTRACT
+            Plane.XY.offset(ball_radius * 0.75 + wall_thickness), mode=Mode.SUBTRACT
         ) as flexcuts:
             with PolarLocations(0, 4):
                 Box(
@@ -135,14 +144,20 @@ def ball_socket(
                     align=(Align.CENTER, Align.CENTER, Align.CENTER),
                     rotation=(90, 0, 0),
                 )
-
     socket.part.label = "Ball Socket"
     return socket.part
 
 
 if __name__ == "__main__":
     show(
-        ball_mount(15),
-        ball_socket(15),  # .rotate(Axis.X, 180).move(Location((0, 0, 52.5))),
+        ball_mount(
+            24.24871131,
+        ),
+        ball_socket(
+            24.24871131,
+            # 15,
+            wall_thickness=2,
+            tolerance=-0.05,
+        ),
         reset_camera=Camera.KEEP,
     )

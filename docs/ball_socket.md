@@ -36,7 +36,7 @@ Creates a ball socket component for a ball-and-socket joint system.
 
 ## Returns
 
-- `Part`: A ball socket part with label "Ball Socket". The socket has a cylindrical outer shell with height of 2 * ball_radius and radius of ball_radius + wall_thickness. Features include a hemispherical cavity, a flange at the top with filleted edges, and four radial flex cuts for ball retention.
+- `Part`: A ball socket part with label "Ball Socket". The socket has a cylindrical outer shell with height of 2 * ball_radius - wall_thickness and radius of ball_radius + wall_thickness. Features include a hemispherical cavity, a flange at the top with filleted edges, and four radial flex cuts for ball retention.
 
 ## Design Features
 
