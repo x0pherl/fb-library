@@ -8,7 +8,7 @@ Dovetail is intended for breaking large parts into a dovetail and socketed part 
 
 ![example of a part split into a dovetail and a socket](dovetail.png)
 
-The `dovetail_subpart` function takes a build123d part and necesarry parameters to break it into either the dovetail or the socket component of the split.
+The `dovetail_subpart` function takes a build123d part and necessary parameters to break it into either the dovetail or the socket component of the split.
 
 ## Arguments
 
