@@ -6,6 +6,7 @@ Also has some utility functions for calculating various useful properties of poi
 from dataclasses import dataclass
 from math import atan2, cos, degrees, radians, sin, tan
 from typing import Union, Tuple
+from build123d import Axis
 
 
 @dataclass
@@ -64,6 +65,52 @@ class Point:
             self.x + distance * cos(angle_rad),
             self.y + distance * sin(angle_rad),
         )
+
+    def related_point_by_axis(
+        self, angle: float, axis_distance: float, axis: Axis = Axis.X
+    ) -> "Point":
+        """from the point, identify a second point at a specified angle with a given distance along x or y axis
+
+        Arguments:
+            angle: The angle in degrees from the current point
+            axis_distance: The distance to travel along the specified axis
+            axis: Either Axis.X or Axis.Y - the axis along which to measure the distance
+
+        Returns:
+            Point: A new point at the specified angle with the given axis distance
+        """
+        angle_rad = radians(angle)
+
+        if axis == Axis.X:
+            # If we want to move axis_distance along x-axis at the given angle
+            # x_distance = axis_distance, so we need to find the corresponding y_distance
+            # cos(angle) = x_distance / hypotenuse, so hypotenuse = x_distance / cos(angle)
+            if abs(cos(angle_rad)) < 1e-10:
+                raise ValueError(
+                    f"Cannot move along x-axis at angle {angle} degrees (cos ≈ 0)"
+                )
+            hypotenuse = abs(axis_distance / cos(angle_rad))
+            return Point(
+                self.x + axis_distance,
+                self.y
+                + hypotenuse * sin(angle_rad) * (1 if cos(angle_rad) > 0 else -1),
+            )
+        elif axis == Axis.Y:
+            # If we want to move axis_distance along y-axis at the given angle
+            # y_distance = axis_distance, so we need to find the corresponding x_distance
+            # sin(angle) = y_distance / hypotenuse, so hypotenuse = y_distance / sin(angle)
+            if abs(sin(angle_rad)) < 1e-10:
+                raise ValueError(
+                    f"Cannot move along y-axis at angle {angle} degrees (sin ≈ 0)"
+                )
+            hypotenuse = abs(axis_distance / sin(angle_rad))
+            return Point(
+                self.x
+                + hypotenuse * cos(angle_rad) * (1 if sin(angle_rad) > 0 else -1),
+                self.y + axis_distance,
+            )
+        else:
+            raise ValueError("axis must be Axis.X or Axis.Y")
 
 
 def midpoint(point1: Point, point2: Point) -> Point:

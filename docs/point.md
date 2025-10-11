@@ -49,6 +49,32 @@ p[1] # returns the y coordinate (3)
      # returns Point(x=1.0000000000000002, y=1.0000000000000002)
     ```
 
+#### related_point_by_axis
+- `related_point_by_axis(angle: float, axis_distance: float, axis: Axis = Axis.X) -> Point`
+  - Identifies a second point at a specified angle with a given distance along the x or y axis from the current point.
+  - **Parameters:**
+    - `angle`: The angle in degrees from the current point
+    - `axis_distance`: The distance to travel along the specified axis
+    - `axis`: Either `Axis.X` or `Axis.Y` - the axis along which to measure the distance (defaults to `Axis.X`)
+  - **Returns:** A new point at the specified angle with the given axis distance
+  - **Note:** This method requires importing `Axis` from `build123d`
+    ```
+    from build123d import Axis
+    from fb_library import Point
+    
+    # Move 5 units along X-axis at 30 degrees
+    Point(0,0).related_point_by_axis(30, 5, Axis.X)
+    # returns Point(x=5.0, y=2.887)
+    
+    # Move 3 units along Y-axis at 60 degrees
+    Point(0,0).related_point_by_axis(60, 3, Axis.Y)
+    # returns Point(x=1.732, y=3.0)
+    
+    # Use default axis (X)
+    Point(0,0).related_point_by_axis(45, 4)
+    # returns Point(x=4.0, y=4.0)
+    ```
+
 ### Utility Functions
 
 - `midpoint(point1: Point, point2: Point) -> Point`
