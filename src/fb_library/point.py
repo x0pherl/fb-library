@@ -20,16 +20,28 @@ class Point:
 
     @property
     def X(self):
-        "the x coordinate of the point"
+        """the x coordinate of the point
+        ----------
+        Returns:
+            - float: The x coordinate of the point"""
         return self.x
 
     @property
     def Y(self):
-        "the y coordinate of the point"
+        """the y coordinate of the point
+        ----------
+        Returns:
+            - float: The y coordinate of the point"""
         return self.y
 
     def __init__(self, x: Union[float, list[float, float]] = None, y: float = None):
-        """initialze the point with x and y coordinates passed as a tuple or idividual values"""
+        """initialize the point with x and y coordinates passed as a tuple or individual values
+        ----------
+        Arguments:
+            - x: Union[float, list[float, float]]
+                The x coordinate or a list containing [x, y] coordinates
+            - y: float
+                The y coordinate (ignored if x is a list)"""
         if isinstance(x, list) and len(x) >= 2:
             self.x, self.y = x
         else:
@@ -37,12 +49,21 @@ class Point:
             self.y = y
 
     def __iter__(self):
-        """iterate through the x and x coordinates of the point"""
+        """iterate through the x and y coordinates of the point
+        ----------
+        Yields:
+            - float: The x coordinate, then the y coordinate"""
         yield self.x
         yield self.y
 
     def __getitem__(self, index):
-        """return the x or y coordinate of the point"""
+        """return the x or y coordinate of the point
+        ----------
+        Arguments:
+            - index: int
+                0 for x coordinate, 1 for y coordinate
+        Returns:
+            - float: The requested coordinate"""
         if index == 0:
             return self.x
         elif index == 1:
@@ -51,15 +72,35 @@ class Point:
             raise IndexError("Index out of range")
 
     def angle_to(self, point: "Point") -> float:
-        """from the point, identify the angle to a second point"""
+        """from the point, identify the angle to a second point
+        ----------
+        Arguments:
+            - point: Point
+                The target point to calculate angle to
+        Returns:
+            - float: The angle in degrees (0-360) from this point to the target point"""
         return degrees(atan2(point.y - self.y, point.x - self.x)) % 360
 
     def distance_to(self, point: "Point") -> float:
-        """from the point, identify the distance to a second point"""
+        """from the point, identify the distance to a second point
+        ----------
+        Arguments:
+            - point: Point
+                The target point to calculate distance to
+        Returns:
+            - float: The Euclidean distance between the two points"""
         return ((self.x - point.x) ** 2 + (self.y - point.y) ** 2) ** 0.5
 
     def related_point(self, angle: float, distance: float) -> "Point":
-        """from the point, identify a second point at a specified angle and distance"""
+        """from the point, identify a second point at a specified angle and distance
+        ----------
+        Arguments:
+            - angle: float
+                The angle in degrees from this point (0° = positive x direction)
+            - distance: float
+                The distance from this point to the new point
+        Returns:
+            - Point: A new point at the specified angle and distance"""
         angle_rad = radians(angle)
         return Point(
             self.x + distance * cos(angle_rad),
@@ -70,15 +111,16 @@ class Point:
         self, angle: float, axis_distance: float, axis: Axis = Axis.X
     ) -> "Point":
         """from the point, identify a second point at a specified angle with a given distance along x or y axis
-
+        ----------
         Arguments:
-            angle: The angle in degrees from the current point
-            axis_distance: The distance to travel along the specified axis
-            axis: Either Axis.X or Axis.Y - the axis along which to measure the distance
-
+            - angle: float
+                The angle in degrees from this point (0° = positive x direction)
+            - axis_distance: float
+                The distance to travel along the specified axis
+            - axis: Axis
+                Either Axis.X or Axis.Y - the axis along which to measure the distance
         Returns:
-            Point: A new point at the specified angle with the given axis distance
-        """
+            - Point: A new point at the specified angle with the given axis distance"""
         angle_rad = radians(angle)
 
         if axis == Axis.X:
