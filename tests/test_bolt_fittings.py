@@ -16,7 +16,7 @@ from build123d import (
     BuildPart,
     Part,
 )
-from fb_library import (
+from fb_library.bolt_fittings import (
     teardrop_bolt_cut_sinkhole,
     bolt_cut_sinkhole,
     square_nut_sinkhole,
@@ -121,7 +121,7 @@ class TestTeardropBoltCutSinkhole:
                 head_radius=head_r,
                 head_depth=head_d,
                 chamfer_radius=chamfer_r,
-                extension_distance=ext
+                extension_distance=ext,
             )
             assert isinstance(result, Part)
             assert result.volume > 0
@@ -130,8 +130,10 @@ class TestTeardropBoltCutSinkhole:
         """Test teardrop bolt cut with custom teardrop_ratio"""
         result1 = teardrop_bolt_cut_sinkhole(teardrop_ratio=1.0)  # Cylindrical
         result2 = teardrop_bolt_cut_sinkhole(teardrop_ratio=1.1)  # Default teardrop
-        result3 = teardrop_bolt_cut_sinkhole(teardrop_ratio=1.2)  # More pronounced teardrop
-        
+        result3 = teardrop_bolt_cut_sinkhole(
+            teardrop_ratio=1.2
+        )  # More pronounced teardrop
+
         assert isinstance(result1, Part)
         assert isinstance(result2, Part)
         assert isinstance(result3, Part)
@@ -141,39 +143,41 @@ class TestTeardropBoltCutSinkhole:
     def test_teardrop_bolt_cut_ratio_1_0_equals_cylindrical(self):
         """Test that teardrop_ratio=1.0 produces same result as bolt_cut_sinkhole"""
         params = {
-            'shaft_radius': 1.65,
-            'shaft_depth': 2.0,
-            'head_radius': 3.1,
-            'head_depth': 5.0,
-            'chamfer_radius': 1.0,
-            'extension_distance': 10.0
+            "shaft_radius": 1.65,
+            "shaft_depth": 2.0,
+            "head_radius": 3.1,
+            "head_depth": 5.0,
+            "chamfer_radius": 1.0,
+            "extension_distance": 10.0,
         }
-        
+
         teardrop_result = teardrop_bolt_cut_sinkhole(**params, teardrop_ratio=1.0)
         bolt_result = bolt_cut_sinkhole(**params)
-        
+
         # Should have identical volumes
         assert abs(teardrop_result.volume - bolt_result.volume) < 1e-6
 
     def test_teardrop_bolt_cut_ratio_variations(self):
         """Test that different teardrop ratios produce different volumes"""
         base_params = {
-            'shaft_radius': 1.65,
-            'shaft_depth': 2.0,
-            'head_radius': 3.1,
-            'head_depth': 5.0,
-            'chamfer_radius': 1.0,
-            'extension_distance': 10.0
+            "shaft_radius": 1.65,
+            "shaft_depth": 2.0,
+            "head_radius": 3.1,
+            "head_depth": 5.0,
+            "chamfer_radius": 1.0,
+            "extension_distance": 10.0,
         }
-        
+
         ratios = [1.0, 1.05, 1.1, 1.15, 1.2]
-        results = [teardrop_bolt_cut_sinkhole(**base_params, teardrop_ratio=r) for r in ratios]
-        
+        results = [
+            teardrop_bolt_cut_sinkhole(**base_params, teardrop_ratio=r) for r in ratios
+        ]
+
         # Each result should be valid
         for result in results:
             assert isinstance(result, Part)
             assert result.volume > 0
-        
+
         # Volumes should increase with ratio
         for i in range(len(results) - 1):
             assert results[i].volume < results[i + 1].volume
@@ -257,16 +261,18 @@ class TestBoltCutSinkhole:
     def test_bolt_cut_vs_teardrop(self):
         """Test that bolt_cut and teardrop_bolt_cut with default ratio produce different results"""
         params = {
-            'shaft_radius': 1.65,
-            'shaft_depth': 2.0,
-            'head_radius': 3.1,
-            'head_depth': 5.0,
-            'chamfer_radius': 1.0,
-            'extension_distance': 10.0
+            "shaft_radius": 1.65,
+            "shaft_depth": 2.0,
+            "head_radius": 3.1,
+            "head_depth": 5.0,
+            "chamfer_radius": 1.0,
+            "extension_distance": 10.0,
         }
 
         bolt_result = bolt_cut_sinkhole(**params)
-        teardrop_result = teardrop_bolt_cut_sinkhole(**params)  # Uses default teardrop_ratio=1.1
+        teardrop_result = teardrop_bolt_cut_sinkhole(
+            **params
+        )  # Uses default teardrop_ratio=1.1
 
         # Teardrop with default ratio should have more volume than cylindrical
         assert isinstance(bolt_result, Part)
@@ -276,12 +282,12 @@ class TestBoltCutSinkhole:
     def test_bolt_cut_is_wrapper_for_teardrop(self):
         """Test that bolt_cut_sinkhole is a wrapper for teardrop with ratio=1.0"""
         params = {
-            'shaft_radius': 2.0,
-            'shaft_depth': 3.0,
-            'head_radius': 4.0,
-            'head_depth': 6.0,
-            'chamfer_radius': 1.5,
-            'extension_distance': 20.0
+            "shaft_radius": 2.0,
+            "shaft_depth": 3.0,
+            "head_radius": 4.0,
+            "head_depth": 6.0,
+            "chamfer_radius": 1.5,
+            "extension_distance": 20.0,
         }
 
         bolt_result = bolt_cut_sinkhole(**params)
@@ -452,12 +458,12 @@ class TestBoltFittingsIntegration:
     def test_consistent_sizing(self):
         """Test that similar dimensions produce similar results"""
         params = {
-            'shaft_radius': 1.65,
-            'shaft_depth': 2.0,
-            'head_radius': 3.1,
-            'head_depth': 5.0,
-            'chamfer_radius': 1.0,
-            'extension_distance': 0
+            "shaft_radius": 1.65,
+            "shaft_depth": 2.0,
+            "head_radius": 3.1,
+            "head_depth": 5.0,
+            "chamfer_radius": 1.0,
+            "extension_distance": 0,
         }
 
         teardrop = teardrop_bolt_cut_sinkhole(**params)  # Default ratio=1.1
@@ -470,12 +476,12 @@ class TestBoltFittingsIntegration:
     def test_teardrop_ratio_parameter_independence(self):
         """Test that teardrop_ratio parameter works independently"""
         params = {
-            'shaft_radius': 1.65,
-            'shaft_depth': 2.0,
-            'head_radius': 3.1,
-            'head_depth': 5.0,
-            'chamfer_radius': 1.0,
-            'extension_distance': 10.0
+            "shaft_radius": 1.65,
+            "shaft_depth": 2.0,
+            "head_radius": 3.1,
+            "head_depth": 5.0,
+            "chamfer_radius": 1.0,
+            "extension_distance": 10.0,
         }
 
         # Test that changing only teardrop_ratio changes volume

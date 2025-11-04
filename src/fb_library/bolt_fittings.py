@@ -8,7 +8,8 @@ from build123d import (
     add,
     extrude,
 )
-from fb_library import anti_chamfer, teardrop_cylinder
+from fb_library.antichamfer import anti_chamfer
+from fb_library.basic_shapes import teardrop_cylinder
 
 
 def teardrop_bolt_cut_sinkhole(
