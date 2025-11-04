@@ -361,10 +361,13 @@ def teardrop_sketch(
     y = radius**2 / peak_distance
 
     with BuildSketch() as teardrop:
-        with BuildLine() as outline:
-            Line((-x, -y), (0, -peak_distance))
-            Line((0, -peak_distance), (x, -y))
-            RadiusArc((x, -y), (-x, -y), radius, short_sagitta=False)
+        if peak_distance == radius:
+            Circle(radius)
+        else:
+            with BuildLine() as outline:
+                Line((-x, -y), (0, -peak_distance))
+                Line((0, -peak_distance), (x, -y))
+                RadiusArc((x, -y), (-x, -y), radius, short_sagitta=False)
         make_face()
     movex = 0
     if align[0] == Align.MAX:
