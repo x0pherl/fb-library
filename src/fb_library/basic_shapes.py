@@ -368,7 +368,7 @@ def teardrop_sketch(
                 Line((-x, -y), (0, -peak_distance))
                 Line((0, -peak_distance), (x, -y))
                 RadiusArc((x, -y), (-x, -y), radius, short_sagitta=False)
-        make_face()
+            make_face()
     movex = 0
     if align[0] == Align.MAX:
         movex -= radius
