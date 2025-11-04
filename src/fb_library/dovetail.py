@@ -9,6 +9,7 @@ from build123d import (
     BuildSketch,
     Box,
     Compound,
+    Cylinder,
     FilletPolyline,
     GridLocations,
     Line,
@@ -24,8 +25,6 @@ from build123d import (
     loft,
     make_face,
 )
-
-from build123d.objects_part import Cylinder, Sphere
 
 # it's a bad habit, but I keep some simple test code under __main__
 # to make creating test object easy -- this adds ".fb_library" to the path
