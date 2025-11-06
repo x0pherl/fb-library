@@ -4,7 +4,7 @@ set -e
 
 PROJECT_NAME="fb-library"
 # Define the test command as a variable
-TEST_CMD="exec(\"from partomatic import Partomatic, PartomaticConfig, AutomatablePart\nprint(PartomaticConfig().stl_folder)\")"
+TEST_CMD="from fb_library import divot; print(f'Divot test valid?: {divot().is_valid}')"
 # Define sleep time for PyPI availability
 PYPI_WAIT_TIME=30
 
