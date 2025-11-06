@@ -41,8 +41,8 @@ class TestHighTopSlideBox:
         assert isinstance(result, Compound)
         assert result.label == "slide box"
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_high_top_slide_box_with_all_params(self, small_base_part):
         """Test high_top_slide_box with all parameters specified."""
@@ -59,8 +59,8 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_high_top_slide_box_lid(self, small_base_part):
         """Test high_top_slide_box_lid function."""
@@ -72,7 +72,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(lid, Part)
-        assert lid.is_valid()
+        assert lid.is_valid
         assert lid.label == "box top"
 
     def test_high_top_slide_box_lid_with_params(self, small_base_part):
@@ -89,7 +89,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(lid, Part)
-        assert lid.is_valid()
+        assert lid.is_valid
 
     def test_high_top_slide_box_base(self, small_base_part):
         """Test high_top_slide_box_base function."""
@@ -101,7 +101,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(base, Part)
-        assert base.is_valid()
+        assert base.is_valid
         assert base.label == "box bottom"
 
     def test_high_top_slide_box_base_with_params(self, small_base_part):
@@ -118,7 +118,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(base, Part)
-        assert base.is_valid()
+        assert base.is_valid
 
     def test_slide_top_rail_cut(self):
         """Test _slide_top_rail_cut internal function."""
@@ -130,7 +130,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(rail_cut, Part)
-        assert rail_cut.is_valid()
+        assert rail_cut.is_valid
 
     def test_slide_top_rail_cut_with_angle(self):
         """Test _slide_top_rail_cut with rail angle."""
@@ -144,7 +144,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(rail_cut, Part)
-        assert rail_cut.is_valid()
+        assert rail_cut.is_valid
 
     def test_high_top_slide_box_top_cut_template_false(self, small_base_part):
         """Test _high_top_slide_box_top with cut_template=False."""
@@ -157,7 +157,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(top, Part)
-        assert top.is_valid()
+        assert top.is_valid
         # The label is set on the BuildPart context, not the returned part
         assert hasattr(top, "label") or top.label == "" or top.label is None
 
@@ -172,7 +172,7 @@ class TestHighTopSlideBox:
         )
 
         assert isinstance(top, Part)
-        assert top.is_valid()
+        assert top.is_valid
 
     def test_dimensions_consistency(self, small_base_part):
         """Test that the dimensions of the created parts are consistent with input."""
@@ -215,8 +215,8 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_negative_tolerance(self, small_base_part):
         """Test with negative tolerance."""
@@ -230,8 +230,8 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_large_rail_angle(self, small_base_part):
         """Test with a larger rail angle."""
@@ -245,8 +245,8 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_minimal_dimensions(self):
         """Test with very small dimensions."""
@@ -262,8 +262,8 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_direct_run(self):
         """Test that the module can be run directly without errors."""
@@ -289,8 +289,8 @@ class TestHighTopSlideBox:
             rail_height=8,
             wall_thickness=0.5,
         )
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
         # Test with very small top height
         result = high_top_slide_box(
@@ -299,8 +299,8 @@ class TestHighTopSlideBox:
             rail_height=8,
             wall_thickness=2,
         )
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
         # Test with very small rail height
         result = high_top_slide_box(
@@ -309,8 +309,8 @@ class TestHighTopSlideBox:
             rail_height=2,
             wall_thickness=2,
         )
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_rectangular_base_part(self):
         """Test with a non-square rectangular base part."""
@@ -326,8 +326,8 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid
 
     def test_tall_base_part(self):
         """Test with a tall base part."""
@@ -343,5 +343,5 @@ class TestHighTopSlideBox:
 
         assert isinstance(result, Compound)
         assert len(result.children) == 2
-        assert result.children[0].is_valid()
-        assert result.children[1].is_valid()
+        assert result.children[0].is_valid
+        assert result.children[1].is_valid

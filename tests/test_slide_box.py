@@ -20,8 +20,8 @@ class TestSlideBox:
         sb = slide_box(
             base_box.part, wall_thickness=2, thumb_radius=3.5, divot_radius=0.5
         )
-        assert sb.children[0].is_valid()
-        assert sb.children[1].is_valid()
+        assert sb.children[0].is_valid
+        assert sb.children[1].is_valid
 
     def test_direct_run(self):
 

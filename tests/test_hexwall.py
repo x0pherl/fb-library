@@ -14,7 +14,7 @@ from fb_library.hexwall import HexWall
 class TestClickfit:
     def test_hexwall(self):
         pattern = HexWall(10, 10, 1, 1, 0.2)
-        assert pattern.is_valid()
+        assert pattern.is_valid
 
     def test_direct_run(self):
 
@@ -27,6 +27,4 @@ class TestClickfit:
             patch("ocp_vscode.save_screenshot"),
         ):
             loader = SourceFileLoader("__main__", "src/fb_library/hexwall.py")
-            loader.exec_module(
-                module_from_spec(spec_from_loader(loader.name, loader))
-            )
+            loader.exec_module(module_from_spec(spec_from_loader(loader.name, loader)))

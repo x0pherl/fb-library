@@ -23,7 +23,7 @@ class TestBallMount:
     def test_ball_mount_basic(self):
         mount = ball_mount(10.0)
         assert isinstance(mount, Part)
-        assert mount.is_valid()
+        assert mount.is_valid
         bbox = mount.bounding_box()
         assert bbox.size.X == pytest.approx(20.0, abs=0.1)
         assert bbox.size.Y == pytest.approx(20.0, abs=0.1)
@@ -33,7 +33,7 @@ class TestBallMount:
     @pytest.mark.parametrize("r", [0.5, 2.0, 7.5, 10.0, 25.0])
     def test_ball_mount_dimensions(self, r):
         mount = ball_mount(r)
-        assert mount.is_valid()
+        assert mount.is_valid
         bbox = mount.bounding_box()
         assert bbox.size.X == pytest.approx(2 * r, abs=0.05)
         assert bbox.size.Y == pytest.approx(2 * r, abs=0.05)
@@ -63,7 +63,7 @@ class TestBallSocket:
         w = 2.0
         socket = ball_socket(r)
         assert isinstance(socket, Part)
-        assert socket.is_valid()
+        assert socket.is_valid
         assert socket.label == "Ball Socket"
         bbox = socket.bounding_box()
         assert bbox.size.X == pytest.approx(expected_socket_diameter(r, w), abs=0.1)
@@ -73,7 +73,7 @@ class TestBallSocket:
     @pytest.mark.parametrize("r,w", [(3, 2), (5, 1), (10, 2), (20, 4), (12.5, 3.5)])
     def test_ball_socket_param_dimensions(self, r, w):
         socket = ball_socket(r, wall_thickness=w)
-        assert socket.is_valid()
+        assert socket.is_valid
         bbox = socket.bounding_box()
         assert bbox.size.X == pytest.approx(expected_socket_diameter(r, w), abs=0.1)
         assert bbox.size.Y == pytest.approx(expected_socket_diameter(r, w), abs=0.1)
@@ -99,7 +99,7 @@ class TestBallSocket:
         r, w = 10.0, 2.0
         loose = ball_socket(r, wall_thickness=w, tolerance=0.5)
         tight = ball_socket(r, wall_thickness=w, tolerance=-0.05)
-        assert loose.is_valid() and tight.is_valid()
+        assert loose.is_valid and tight.is_valid
         # Larger positive tolerance removes more -> smaller remaining part volume
         assert loose.volume < tight.volume
 
@@ -152,7 +152,7 @@ class TestBallSocketPairCompatibility:
     def test_mount_socket_compatibility(self, r):
         mount = ball_mount(r)
         socket = ball_socket(r)
-        assert mount.is_valid() and socket.is_valid()
+        assert mount.is_valid and socket.is_valid
         mount_bbox = mount.bounding_box()
         socket_bbox = socket.bounding_box()
         # Mount ball diameter should be <= socket outer diameter
@@ -169,8 +169,8 @@ class TestBallSocketPairCompatibility:
 
     def test_multiple_radius_compatibility(self):
         for r in [2.0, 5.0, 10.0, 15.0, 20.0]:
-            assert ball_mount(r).is_valid()
-            assert ball_socket(r).is_valid()
+            assert ball_mount(r).is_valid
+            assert ball_socket(r).is_valid
 
 
 # ---------- Edge / Extreme Cases ----------
@@ -179,8 +179,8 @@ class TestEdgeCases:
     def test_extreme_tolerance_values(self):
         tight = ball_socket(10.0, tolerance=-0.1)
         loose = ball_socket(10.0, tolerance=1.0)
-        assert tight.is_valid()
-        assert loose.is_valid()
+        assert tight.is_valid
+        assert loose.is_valid
         assert loose.volume < ball_socket(10.0, tolerance=0.0).volume
 
     def test_parameter_validation_edge_cases(self):
@@ -191,10 +191,10 @@ class TestEdgeCases:
             (10.0, 8.0, 0.5),
         ]
         for r, w, t in cases:
-            assert ball_mount(r).is_valid()
+            assert ball_mount(r).is_valid
             # Skip socket test for very thin walls
             if w >= 0.5:  # Only test if wall thickness is reasonable
-                assert ball_socket(r, w, t).is_valid()
+                assert ball_socket(r, w, t).is_valid
 
 
 # ---------- Direct Run ----------
@@ -225,7 +225,7 @@ class TestGeometryDetails:
         # Indirect: ensure top height unchanged but internal edge count reduced after fillet
         r, w = 10.0, 2.0
         socket = ball_socket(r, wall_thickness=w)
-        assert socket.is_valid()
+        assert socket.is_valid
         bbox = socket.bounding_box()
         assert bbox.size.Z == pytest.approx(expected_socket_height(r, w), abs=0.1)
 

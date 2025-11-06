@@ -32,7 +32,7 @@ class TestTwistSnap:
             wall_width=2,
             wall_depth=2,
         )
-        assert connector.is_valid()
+        assert connector.is_valid
 
     def test_twist_snap_socket(self):
         socket = twist_snap_socket(
@@ -43,4 +43,4 @@ class TestTwistSnap:
             wall_width=2,
             wall_depth=2,
         )
-        assert socket.is_valid()
+        assert socket.is_valid

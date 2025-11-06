@@ -100,7 +100,7 @@ class TestDovetail:
                     click_fit_radius=0.5,
                 ),
             )
-        assert tail.part.is_valid()
+        assert tail.part.is_valid
 
     def test_valid_socket(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
@@ -117,7 +117,7 @@ class TestDovetail:
                     vertical_offset=-0.5,
                 ),
             )
-        assert socket.part.is_valid()
+        assert socket.part.is_valid
 
     def test_raises_invalid_style_for_snugtail(self):
         with pytest.raises(ValueError):
@@ -144,7 +144,7 @@ class TestDovetail:
                     vertical_offset=-0.5,
                 ),
             )
-        assert socket.part.is_valid()
+        assert socket.part.is_valid
 
     def test_valid_tslot_tail(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
@@ -162,7 +162,7 @@ class TestDovetail:
                     vertical_offset=-0.5,
                 ),
             )
-        assert tail.part.is_valid()
+        assert tail.part.is_valid
 
     def test_valid_snugtail_tail(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
@@ -181,7 +181,7 @@ class TestDovetail:
                     click_fit_radius=1,
                 ),
             )
-        assert tail.part.is_valid()
+        assert tail.part.is_valid
 
     def test_valid_snugtail_socket(self):
         with BuildPart(mode=Mode.PRIVATE) as test:
@@ -200,7 +200,7 @@ class TestDovetail:
                     click_fit_radius=1,
                 ),
             )
-        assert socket.part.is_valid()
+        assert socket.part.is_valid
 
     def test_snugtail_ratios_exceed_max(self):
         with BuildPart(mode=Mode.PRIVATE) as test:

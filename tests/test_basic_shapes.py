@@ -57,13 +57,13 @@ class TestTriangleFunctions:
 class TestTearDropSketch:
     def test_teardropsketch(self):
         sketch = teardrop_sketch(10, 12, align=(Align.MAX, Align.MIN))
-        assert sketch.is_valid()
+        assert sketch.is_valid
         assert sketch.bounding_box().size.X == pytest.approx(20)
         assert sketch.bounding_box().size.Y == pytest.approx(22)
 
     def test_teardropsketch_aligned(self):
         sketch = teardrop_sketch(10, 12, align=(Align.MIN, Align.MAX))
-        assert sketch.is_valid()
+        assert sketch.is_valid
         assert sketch.bounding_box().size.X == pytest.approx(20)
         assert sketch.bounding_box().size.Y == pytest.approx(22)
 
@@ -73,7 +73,7 @@ class TestTearDropCylinder:
         cyl = teardrop_cylinder(
             10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(20)
         assert cyl.bounding_box().size.Y == pytest.approx(21)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
@@ -82,7 +82,7 @@ class TestTearDropCylinder:
         cyl = teardrop_cylinder(
             10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MAX)
         )
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(20)
         assert cyl.bounding_box().size.Y == pytest.approx(21)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
@@ -91,7 +91,7 @@ class TestTearDropCylinder:
         cyl = teardrop_cylinder(
             10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.CENTER)
         )
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(20)
         assert cyl.bounding_box().size.Y == pytest.approx(21)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
@@ -100,7 +100,7 @@ class TestTearDropCylinder:
         cyl = teardrop_cylinder(
             10, 11, 10, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(20)
         assert cyl.bounding_box().size.Y == pytest.approx(21)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
@@ -140,7 +140,7 @@ class TestRoundedCylinder:
 
     def test_rounded_cylinder(self):
         cyl = rounded_cylinder(5, 11)
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert isinstance(cyl, Part)
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
@@ -152,7 +152,7 @@ class TestHalfPart:
         with BuildPart() as whole_part:
             Box(10, 10, 10, align=(Align.CENTER, Align.CENTER, Align.CENTER))
         half = half_part(whole_part.part)
-        assert half.is_valid()
+        assert half.is_valid
         assert half.volume == pytest.approx(whole_part.part.volume / 2)
 
 
@@ -160,28 +160,28 @@ class TestPolygonalCylinder:
 
     def test_diamond_cylinder(self):
         cyl = diamond_cylinder(5, 10)
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_diamond_cylinder_zmax(self):
         cyl = diamond_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_polygonal_cylinder(self):
         cyl = polygonal_cylinder(5, 10)
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(10)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
 
     def test_polygonal_cylinder(self):
         cyl = polygonal_cylinder(5, 10, align=(Align.CENTER, Align.CENTER, Align.MAX))
-        assert cyl.is_valid()
+        assert cyl.is_valid
         assert cyl.bounding_box().size.X == pytest.approx(10)
         assert cyl.bounding_box().size.Y == pytest.approx(8.660254237844388)
         assert cyl.bounding_box().size.Z == pytest.approx(10)
@@ -198,7 +198,7 @@ class TestPolygonalCylinder:
             height=height,
             align=(Align.CENTER, Align.CENTER, Align.MAX),
         )
-        assert cylinder_max.is_valid()
+        assert cylinder_max.is_valid
 
         # Test Align.CENTER (line 203)
         cylinder_center = teardrop_cylinder(
@@ -207,7 +207,7 @@ class TestPolygonalCylinder:
             height=height,
             align=(Align.CENTER, Align.CENTER, Align.CENTER),
         )
-        assert cylinder_center.is_valid()
+        assert cylinder_center.is_valid
 
         # Test Align.MIN (default case, not explicitly in those lines but completes coverage)
         cylinder_min = teardrop_cylinder(
@@ -216,7 +216,7 @@ class TestPolygonalCylinder:
             height=height,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
-        assert cylinder_min.is_valid()
+        assert cylinder_min.is_valid
 
         # Verify that different alignments produce different Z positions
         # This ensures the alignment logic is actually working
@@ -231,14 +231,14 @@ class TestPolygonalCylinder:
 class TestScrewCut:
     def test_screw_cut(self):
         screw = screw_cut(5, 1, 2, 10, 10)
-        assert screw.is_valid()
+        assert screw.is_valid
         assert screw.bounding_box().size.X == pytest.approx(10)
         assert screw.bounding_box().size.Y == pytest.approx(10)
         assert screw.bounding_box().size.Z == pytest.approx(20)
 
     def test_nut_cut(self):
         nut = nut_cut(5, 1, 2, 10)
-        assert nut.is_valid()
+        assert nut.is_valid
 
     def test_invalid_screw_cut(self):
         with pytest.raises(ValueError):
@@ -246,7 +246,7 @@ class TestScrewCut:
 
     def test_heatsink_cut(self):
         heatsink = heatsink_cut(10, 1, 5, 10)
-        assert heatsink.is_valid()
+        assert heatsink.is_valid
         assert heatsink.bounding_box().size.X == pytest.approx(20)
         assert heatsink.bounding_box().size.Y == pytest.approx(20)
         assert heatsink.bounding_box().size.Z == pytest.approx(11)

@@ -14,9 +14,9 @@ from fb_library.click_fit import divot
 class TestClickfit:
     def test_divot(self):
         hole = divot(10, False)
-        assert hole.is_valid()
+        assert hole.is_valid
         bump = divot(10, True)
-        assert bump.is_valid()
+        assert bump.is_valid
 
     def test_direct_run(self):
 
@@ -28,9 +28,5 @@ class TestClickfit:
             patch("ocp_vscode.show"),
             patch("ocp_vscode.save_screenshot"),
         ):
-            loader = SourceFileLoader(
-                "__main__", "src/fb_library/click_fit.py"
-            )
-            loader.exec_module(
-                module_from_spec(spec_from_loader(loader.name, loader))
-            )
+            loader = SourceFileLoader("__main__", "src/fb_library/click_fit.py")
+            loader.exec_module(module_from_spec(spec_from_loader(loader.name, loader)))
