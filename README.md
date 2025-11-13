@@ -1,23 +1,16 @@
-# fb-library Overview
+# Project Migration
+
+fb_lbrary is currently deprecated, and has been replaced with [b3dkit](https://github.com/x0pherl/b3dkit)
+
 
 The Fender-Bender library began as a way to externalize and isolate some common [build123d](https://github.com/gumyr/build123d) utilities, functions, & methods from the [Fender-Bender](https://github.com/x0pherl/fender-bender) project.
 
-It's grown to include some capabilities not required by that project. Useful components include:
+It grew to include many capabilities not required by that project and outgrew its name as well.
 
-- dovetail: Splits a build123d `Part` object into two parts that can easily be slid together with very tight tolerances. Useful when building parts larger than your printer's build volume.
-- click_fit: a tapered profile that allows for better printing & assembly than a simple half Sphere to allow parts to "click" or snap into place when fit together. The extruded shape and the socket are both shaped carefully to allow a mix of easy assembly and good hold.
-- point: a lightweight X,Y coordinate point object with some geometric functions built into the object.
-- hexwall: builds a field of hexagons with gaps in-between within a given set of bounds.
+As it's expanded beyond its original purpose, I've wanted to update it to have a more "build123d-native" feel. For example, in fb-library you would always have to add a Part with the add function even within a BuildPart context. Example:
 
-# Documentation
+Also, fb-library followed pep-8 method naming conventions while Build123d uses CamelCase method names. This creates friction when using fb-library.
 
-Complete developer documentation for fb-library is maintained in the docs folder and on the [fb-library documentation](https://fb-library.readthedocs.io) site.
+So we've now archived this library, and unfortunately this means anyone currently using fb-library on an active project that wants to continue to get updates and new functionality will need to refactor their code around the new b3dkit standards.
 
-# Modifying the Source
-The included source files rely on the build123d library. I recommend following the build123d installation instructions.
-
-# Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-# License
-This project is licensed under the terms of the [MIT](https://choosealicense.com/licenses/mit/) license
+This was a tough choice to make, but it was not going to get easier over time.
